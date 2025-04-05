@@ -8,13 +8,47 @@ version = "1.0.0"
 description = "A template for FastAPI"
 readme = "README.md"
 requires-python = ">=3.13"
+license = "MIT"
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: FastAPI",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+]
 dependencies = [
-    "fastapi[standard]>=0.115.11",
-    "hatchling>=1.27.0",
-    "mypy>=1.15.0",
-    "ruff>=0.11.0",
+    "fastapi[standard]",
+    "uvicorn",
+    "sqlalchemy",
+    "alembic",
+    "asyncpg",
+    "psycopg2-binary",
+    "redis",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]",
+    "python-multipart",
+    "python-dotenv",
+    "pydantic",
+    "pydantic-settings",
+    "email-validator",
+    "loguru",
+    "hatchling",
+    "mypy",
+    "ruff",
 ]
 
+
+
+[project.scripts]
+dev = "src.settings.run:dev_command"
+prod = "src.settings.run:prod_command"
+format = "src.settings.run:ruff_fix"
+lint = "src.settings.run:ruff_lint"
+makemigrations = "src.settings.run:makemigrations"
+migrate = "src.settings.run:migrate"
+createsuperuser = "scripts.create_superuser:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
@@ -22,43 +56,29 @@ packages = ["src"]
 [tool.uv]
 package = true
 
-[dependency-groups]
-dev = [
-    "ruff>=0.11.0",
-]
-
-
 [tool.ruff]
 target-version = "py311"
 line-length = 120
 fix = true
 lint.select = [
-    # https://docs.astral.sh/ruff/rules/#pyflakes-f
-    "F", # Pyflakes
-    # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
-    "E", # pycodestyle
-    "W", # Warning
-    # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
-    # https://docs.astral.sh/ruff/rules/#mccabe-c90
-    "C", # Complexity (mccabe+) & comprehensions
-    # https://docs.astral.sh/ruff/rules/#pyupgrade-up
-    "UP", # pyupgrade
-    # https://docs.astral.sh/ruff/rules/#isort-i
-    "I", # isort
+    "F",
+    "E",
+    "W",
+    "C",
+    "UP",
+    "I",
 ]
 lint.ignore = [
-    # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
-    "E402", # module level import not at top of file
-    # https://docs.astral.sh/ruff/rules/#pyupgrade-up
-    "UP006", # use-pep585-annotation
-    "UP007", # use-pep604-annotation
-    "E741",  # Ambiguous variable name
-    # "UP035", # deprecated-assertion
+    "E402",
+    "UP006",
+    "UP007",
+    "E741",
 ]
+
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = [
-    "F401", # unused import
-    "F403", # star imports
+    "F401",
+    "F403",
 ]
 
 [tool.ruff.lint.mccabe]
@@ -68,8 +88,4 @@ max-complexity = 24
 convention = "numpy"
 
 
-[project.scripts]
-dev = "src.settings.run:dev_command"
-prod = "src.settings.run:prod_command"
-format = "src.settings.run:ruff_fix"
-lint = "src.settings.run:ruff_lint"
+
