@@ -291,11 +291,160 @@ The application uses JWT tokens for authentication. The following endpoints are 
 
 ## Role-Based Access Control (RBAC)
 
-The application uses a role-based access control system with the following models:
+This project implements a comprehensive Role-Based Access Control (RBAC) system that provides flexible and granular access control.
 
-- `User` - User model with roles
-- `Role` - Role model with permissions
-- `Permission` - Permission model with resource and action
+### Core Components
+
+1. **Users**
+   - Can have multiple roles
+   - Can be superusers (bypass all permission checks)
+   - Authenticated using JWT tokens
+
+2. **Roles**
+   - Named collections of permissions (e.g., "admin", "editor", "viewer")
+   - Can have multiple permissions
+   - Users can have multiple roles
+
+3. **Permissions**
+   - Defined by resource and action pairs (e.g., "posts:create", "users:read")
+   - Can be assigned to roles
+   - Superusers automatically have all permissions
+
+### Permission Structure
+
+Permissions follow the format: `resource:action`
+
+Common actions include:
+- `create`: Create new resources
+- `read`: View resources
+- `update`: Modify existing resources
+- `delete`: Remove resources
+- `*`: All actions on a resource
+
+Examples:
+```python
+# Full access to posts
+Permission(resource="posts", action="*")
+
+# Read-only access to users
+Permission(resource="users", action="read")
+
+# Create and update products
+Permission(resource="products", action="create")
+Permission(resource="products", action="update")
+```
+
+### Usage Examples
+
+1. **Protecting API Endpoints**
+```python
+from src.app.api.deps import has_permission
+
+@router.post("/posts/")
+async def create_post(
+    post: PostCreate,
+    current_user: User = Depends(has_permission("posts", "create"))
+):
+    # Only users with 'posts:create' permission can access this endpoint
+    pass
+
+@router.get("/users/")
+async def list_users(
+    current_user: User = Depends(has_permission("users", "read"))
+):
+    # Only users with 'users:read' permission can access this endpoint
+    pass
+```
+
+2. **Creating Roles and Permissions**
+```python
+# Create an editor role
+editor_role = Role(
+    name="editor",
+    description="Can manage blog posts"
+)
+
+# Add permissions to the role
+editor_permissions = [
+    Permission(resource="posts", action="create"),
+    Permission(resource="posts", action="update"),
+    Permission(resource="posts", action="read"),
+]
+editor_role.permissions.extend(editor_permissions)
+```
+
+3. **Assigning Roles to Users**
+```python
+# Assign editor role to user
+user.roles.append(editor_role)
+await db.commit()
+```
+
+### Built-in Roles
+
+1. **Superuser**
+   - Has all permissions
+   - Created using `uv run createsuperuser`
+   - Can manage other users and roles
+
+### Managing RBAC
+
+1. **Creating a Superuser**
+```bash
+# Using CLI
+uv run createsuperuser
+
+# Follow the prompts to enter email, username, and password
+```
+
+2. **API Endpoints for RBAC Management**
+- `POST /api/v1/roles/` - Create new role
+- `GET /api/v1/roles/` - List all roles
+- `PUT /api/v1/roles/{role_id}` - Update role
+- `DELETE /api/v1/roles/{role_id}` - Delete role
+- `POST /api/v1/permissions/` - Create new permission
+- `GET /api/v1/permissions/` - List all permissions
+- `PUT /api/v1/permissions/{permission_id}` - Update permission
+- `DELETE /api/v1/permissions/{permission_id}` - Delete permission
+
+3. **Checking Permissions in Code**
+```python
+# Check if user has specific permission
+for role in user.roles:
+    for permission in role.permissions:
+        if permission.resource == "posts" and permission.action == "create":
+            # User has permission to create posts
+            pass
+
+# Using the dependency
+from src.app.api.deps import has_permission
+
+@router.post("/posts/")
+async def create_post(
+    current_user: User = Depends(has_permission("posts", "create"))
+):
+    # Only accessible to users with posts:create permission
+    pass
+```
+
+### Best Practices
+
+1. **Permission Naming**
+   - Use lowercase for resources and actions
+   - Use descriptive names (e.g., "user_profiles" instead of "profiles")
+   - Be consistent with action names (create, read, update, delete)
+
+2. **Role Design**
+   - Follow the principle of least privilege
+   - Create roles based on job functions
+   - Avoid giving more permissions than necessary
+   - Document role purposes and permissions
+
+3. **Security Considerations**
+   - Regularly audit role assignments
+   - Remove unused roles and permissions
+   - Keep superuser access limited
+   - Log permission checks and role changes
 
 ## Contributing
 

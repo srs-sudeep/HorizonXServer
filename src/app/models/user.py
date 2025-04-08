@@ -28,3 +28,5 @@ class User(Base):
     roles: Mapped[List["Role"]] = relationship(
         "Role", secondary=user_role, back_populates="users"
     )
+    posts: Mapped[List["Post"]] = relationship("Post", back_populates="author")
+

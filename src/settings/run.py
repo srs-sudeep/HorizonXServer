@@ -71,9 +71,15 @@ def makemigrations() -> None:
     # Copy development environment file
     copy_env_file("development")
 
+    # Get migration message from user
+    message = input("Enter migration message: ").strip()
+    if not message:
+        print("Migration message cannot be empty")
+        sys.exit(1)
+
     # Generate new migration
     result = subprocess.run(
-        ["alembic", "revision", "--autogenerate", "-m", "Auto-generated migration"],
+        ["alembic", "revision", "--autogenerate", "-m", message],
         capture_output=True,
         text=True
     )
@@ -135,6 +141,7 @@ if __name__ == "__main__":
     else:
         print("Invalid command. Use 'dev', 'prod', 'format', 'lint', 'makemigrations', or 'migrate'")
         sys.exit(1)
+
 
 
 
