@@ -31,3 +31,4 @@ class RefreshToken(BaseModel):
     """Refresh token schema."""
 
     refresh_token: str
+

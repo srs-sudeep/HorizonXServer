@@ -45,7 +45,7 @@ def create_access_token(
     Create access token.
 
     Args:
-        subject: Token subject (usually user ID)
+        subject: Token subject (username)
         expires_delta: Token expiration time
 
     Returns:
@@ -70,7 +70,7 @@ def create_refresh_token(subject: Union[str, Any]) -> str:
     Create refresh token.
 
     Args:
-        subject: Token subject (usually user ID)
+        subject: Token subject (username)
 
     Returns:
         JWT token
@@ -81,3 +81,4 @@ def create_refresh_token(subject: Union[str, Any]) -> str:
         to_encode, settings.SECRET_KEY, algorithm="HS256"
     )
     return encoded_jwt
+

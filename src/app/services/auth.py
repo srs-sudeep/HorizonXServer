@@ -1,36 +1,25 @@
 """Authentication service."""
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime
+from typing import Optional, Dict
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.models.user import User
 from src.app.schemas.auth import TokenPayload
 from src.app.services.user import UserService
-from src.core.config import settings
-from src.core.db.session import get_db
 from src.core.security import create_access_token, create_refresh_token
+from src.core.config import settings
 
 
 class AuthService:
     """Authentication service."""
 
-    def __init__(
-        self,
-        db: AsyncSession = Depends(get_db),
-        user_service: UserService = Depends(),
-    ):
-        """
-        Initialize authentication service.
-
-        Args:
-            db: Database session
-            user_service: User service
-        """
+    def __init__(self, db: AsyncSession):
+        """Initialize authentication service."""
         self.db = db
-        self.user_service = user_service
+        self.user_service = UserService(db)
 
     async def authenticate(self, username: str, password: str) -> Optional[User]:
         """
@@ -45,23 +34,23 @@ class AuthService:
         """
         return await self.user_service.authenticate(username, password)
 
-    def create_tokens(self, user_id: int) -> dict:
+    def create_tokens(self, username: str) -> Dict[str, str]:
         """
         Create access and refresh tokens.
 
         Args:
-            user_id: User ID
+            username: Username of the user
 
         Returns:
             Dictionary with tokens
         """
         return {
-            "access_token": create_access_token(user_id),
-            "refresh_token": create_refresh_token(user_id),
+            "access_token": create_access_token(username),
+            "refresh_token": create_refresh_token(username),
             "token_type": "bearer",
         }
 
-    async def refresh_tokens(self, refresh_token: str) -> dict:
+    async def refresh_tokens(self, refresh_token: str) -> Dict[str, str]:
         """
         Refresh tokens.
 
@@ -89,14 +78,21 @@ class AuthService:
                 )
 
             # Check if token is expired
-            if token_data.exp < datetime.utcnow().timestamp():
+            if token_data.exp and token_data.exp < datetime.utcnow().timestamp():
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token expired",
                 )
 
-            # Get user
-            user = await self.user_service.get_by_id(int(token_data.sub))
+            # Get username from token
+            if not token_data.sub:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid token",
+                )
+
+            # Get user using username
+            user = await self.user_service.get_by_username(token_data.sub)
             if not user:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -104,10 +100,15 @@ class AuthService:
                 )
 
             # Create new tokens
-            return self.create_tokens(user.id)
+            return self.create_tokens(user.username)
 
         except JWTError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token",
             )
+
+
+
+
+

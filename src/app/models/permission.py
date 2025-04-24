@@ -1,10 +1,8 @@
 """Permission model for RBAC."""
 from typing import List, Optional
-
 from sqlalchemy import Column, String
 from sqlalchemy.orm import Mapped, relationship
-
-from src.core.db.base import Base
+from src.core.db import Base
 
 
 class Permission(Base):
@@ -16,6 +14,6 @@ class Permission(Base):
     action = Column(String, nullable=False)
 
     # Relationships
-    roles: Mapped[List["Role"]] = relationship(
+    roles: Mapped[List["Role"]] = relationship( # type: ignore
         "Role", secondary="role_permission", back_populates="permissions"
     )
