@@ -1,4 +1,5 @@
 """Database session management."""
+
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import (
@@ -14,12 +15,12 @@ from src.core.config import settings
 engine = create_async_engine(
     str(settings.DATABASE_URL),
     echo=settings.DEBUG,  # SQL logging
-    future=True,         # Enable future SQLAlchemy features
+    future=True,  # Enable future SQLAlchemy features
     pool_pre_ping=True,  # Enable connection health checks
-    pool_size=20,        # Maximum number of connections in the pool
-    max_overflow=10,     # Maximum number of connections that can be created beyond pool_size
-    pool_timeout=30,     # Timeout for getting connection from pool
-    pool_recycle=1800,   # Recycle connections after 30 minutes
+    pool_size=20,  # Maximum number of connections in the pool
+    max_overflow=10,  # Maximum number of connections that can be created beyond pool_size
+    pool_timeout=30,  # Timeout for getting connection from pool
+    pool_recycle=1800,  # Recycle connections after 30 minutes
 )
 
 # Create async session factory
@@ -27,8 +28,8 @@ async_session_factory = async_sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False,  # Don't expire objects after commit
-    autoflush=False,         # Don't auto flush changes
-    autocommit=False,        # Don't auto commit transactions
+    autoflush=False,  # Don't auto flush changes
+    autocommit=False,  # Don't auto commit transactions
 )
 
 
@@ -65,4 +66,3 @@ def create_test_engine():
         future=True,
         poolclass=NullPool,  # Disable connection pooling for tests
     )
-

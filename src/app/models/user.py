@@ -1,10 +1,15 @@
 """User model."""
-from typing import List
+
+from typing import List, TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import Mapped, relationship
 
 from src.core.db import Base
+
+if TYPE_CHECKING:
+    from src.app.models.role import Role
+    from src.app.models.post import Post
 
 # User-Role association table
 user_role = Table(
@@ -25,10 +30,7 @@ class User(Base):
     is_superuser = Column(Boolean, default=False)
 
     # Relationships
-    roles: Mapped[List["Role"]] = relationship( # type: ignore
+    roles: Mapped[List["Role"]] = relationship(
         "Role", secondary=user_role, back_populates="users"
     )
-    posts: Mapped[List["Post"]] = relationship("Post", back_populates="author") # type: ignore
-
-
-
+    posts: Mapped[List["Post"]] = relationship("Post", back_populates="author")

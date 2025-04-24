@@ -1,4 +1,5 @@
 """Post service."""
+
 from typing import List, Optional
 
 from fastapi import HTTPException, status
@@ -23,9 +24,7 @@ class PostService:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_multi(
-        self, skip: int = 0, limit: int = 100
-    ) -> List[Post]:
+    async def get_multi(self, skip: int = 0, limit: int = 100) -> List[Post]:
         """Get multiple posts."""
         query = select(Post).offset(skip).limit(limit)
         result = await self.db.execute(query)

@@ -1,4 +1,5 @@
 """Schemas package."""
+
 from src.app.schemas.auth import Login, RefreshToken, Token, TokenPayload
 from src.app.schemas.permission import (
     Permission,

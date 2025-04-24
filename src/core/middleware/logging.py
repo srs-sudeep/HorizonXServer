@@ -1,4 +1,5 @@
 """Logging middleware."""
+
 from typing import Callable
 
 from fastapi import Request, Response

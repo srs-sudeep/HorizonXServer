@@ -1,4 +1,5 @@
 """User endpoints."""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +9,7 @@ from src.app.schemas import UserCreate, User
 from src.app.services.user import UserService
 
 router = APIRouter()
+
 
 @router.post("/", response_model=User)
 async def create_user(
@@ -21,10 +23,10 @@ async def create_user(
         raise HTTPException(status_code=400, detail="Email already registered")
     return await user_service.create_user(user_in)
 
+
 @router.get("/me", response_model=User)
 async def get_current_user_info(
     current_user: User = Depends(get_current_user),
 ) -> User:
     """Get current user info."""
     return current_user
-

@@ -1,4 +1,5 @@
 """Permission service."""
+
 from typing import List, Optional
 
 from fastapi import HTTPException, status
@@ -28,9 +29,7 @@ class PermissionService:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_multi(
-        self, skip: int = 0, limit: int = 100
-    ) -> List[Permission]:
+    async def get_multi(self, skip: int = 0, limit: int = 100) -> List[Permission]:
         """Get multiple permissions."""
         query = select(Permission).offset(skip).limit(limit)
         result = await self.db.execute(query)

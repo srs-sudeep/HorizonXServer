@@ -45,8 +45,10 @@ dependencies = [
 [project.scripts]
 dev = "src.settings.run:dev_command"
 prod = "src.settings.run:prod_command"
-format = "src.settings.run:ruff_fix"
+format = "src.settings.run:ruff_format"
+format-fix = "src.settings.run:ruff_format_fix"
 lint = "src.settings.run:ruff_lint"
+lint-fix = "src.settings.run:ruff_lint_fix"
 makemigrations = "src.settings.run:makemigrations"
 migrate = "src.settings.run:migrate"
 createsuperuser = "scripts.create_superuser:main"
@@ -87,6 +89,7 @@ max-complexity = 24
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
 
 
 

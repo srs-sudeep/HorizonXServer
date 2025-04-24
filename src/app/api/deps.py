@@ -1,4 +1,5 @@
 """API dependencies."""
+
 from typing import Generator, List, Optional
 
 from fastapi import Depends, HTTPException, status
@@ -152,10 +153,7 @@ def has_permission(resource: str, action: str):
         # Check if user has permission
         for role in current_user.roles:
             for permission in role.permissions:
-                if (
-                    permission.resource == resource
-                    and permission.action == action
-                ):
+                if permission.resource == resource and permission.action == action:
                     return current_user
 
         # User does not have permission
@@ -165,5 +163,3 @@ def has_permission(resource: str, action: str):
         )
 
     return check_permission
-
-

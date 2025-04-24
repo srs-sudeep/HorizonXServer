@@ -1,4 +1,5 @@
 """RBAC management endpoints."""
+
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -13,6 +14,7 @@ from src.app.services.role import RoleService
 
 router = APIRouter()
 
+
 # Role endpoints
 @router.post("/roles", response_model=Role)
 async def create_role(
@@ -24,6 +26,7 @@ async def create_role(
     role_service = RoleService(db)
     return await role_service.create(role_in)
 
+
 @router.get("/roles", response_model=List[Role])
 async def list_roles(
     skip: int = 0,
@@ -34,6 +37,7 @@ async def list_roles(
     """List roles."""
     role_service = RoleService(db)
     return await role_service.get_multi(skip=skip, limit=limit)
+
 
 @router.get("/roles/{role_id}", response_model=Role)
 async def get_role(
@@ -47,6 +51,7 @@ async def get_role(
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
     return role
+
 
 @router.put("/roles/{role_id}", response_model=Role)
 async def update_role(
@@ -62,6 +67,7 @@ async def update_role(
         raise HTTPException(status_code=404, detail="Role not found")
     return await role_service.update(role, role_in)
 
+
 @router.delete("/roles/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_role(
     role_id: int,
@@ -75,6 +81,7 @@ async def delete_role(
         raise HTTPException(status_code=404, detail="Role not found")
     await role_service.delete(role_id)
 
+
 # Permission endpoints
 @router.post("/permissions", response_model=Permission)
 async def create_permission(
@@ -86,6 +93,7 @@ async def create_permission(
     permission_service = PermissionService(db)
     return await permission_service.create(permission_in)
 
+
 @router.get("/permissions", response_model=List[Permission])
 async def list_permissions(
     skip: int = 0,
@@ -96,6 +104,7 @@ async def list_permissions(
     """List permissions."""
     permission_service = PermissionService(db)
     return await permission_service.get_multi(skip=skip, limit=limit)
+
 
 @router.get("/permissions/{permission_id}", response_model=Permission)
 async def get_permission(
@@ -109,6 +118,7 @@ async def get_permission(
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
     return permission
+
 
 @router.put("/permissions/{permission_id}", response_model=Permission)
 async def update_permission(
@@ -124,6 +134,7 @@ async def update_permission(
         raise HTTPException(status_code=404, detail="Permission not found")
     return await permission_service.update(permission, permission_in)
 
+
 @router.delete("/permissions/{permission_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_permission(
     permission_id: int,
@@ -137,6 +148,7 @@ async def delete_permission(
         raise HTTPException(status_code=404, detail="Permission not found")
     await permission_service.delete(permission_id)
 
+
 # Role-Permission management
 @router.post("/roles/{role_id}/permissions/{permission_id}")
 async def add_permission_to_role(
@@ -148,6 +160,7 @@ async def add_permission_to_role(
     """Add permission to role."""
     role_service = RoleService(db)
     return await role_service.add_permission(role_id, permission_id)
+
 
 @router.delete("/roles/{role_id}/permissions/{permission_id}")
 async def remove_permission_from_role(

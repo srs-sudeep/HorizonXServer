@@ -1,4 +1,5 @@
 """Authentication service."""
+
 from datetime import datetime
 from typing import Optional, Dict
 
@@ -107,8 +108,3 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token",
             )
-
-
-
-
-

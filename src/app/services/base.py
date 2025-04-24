@@ -1,9 +1,11 @@
 """Base service class with common database operations."""
+
 from typing import Generic, List, Optional, Type, TypeVar
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 ModelType = TypeVar("ModelType")
+
 
 class BaseService(Generic[ModelType]):
     """Base class for all services."""

@@ -1,4 +1,5 @@
 """Core package."""
+
 from src.core.config import settings
 from src.core.security import (
     create_access_token,

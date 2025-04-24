@@ -1,4 +1,5 @@
 """Run script for the application."""
+
 import os
 import shutil
 import subprocess
@@ -26,6 +27,7 @@ def run_server(env_type: str) -> None:
 
     # Load environment variables from the copied .env file
     from dotenv import load_dotenv
+
     load_dotenv()
 
     host = os.getenv("HOST", "127.0.0.1")
@@ -61,9 +63,37 @@ def ruff_lint() -> None:
     subprocess.run(["ruff", "check", "src/"])
 
 
-def ruff_fix() -> None:
-    """Run ruff formatter."""
-    subprocess.run(["ruff", "format", "src/"])
+def ruff_format() -> None:
+    """Run ruff formatter in check mode (show what would be formatted)."""
+    subprocess.run(
+        [
+            "ruff",
+            "format",
+            "--check",
+            "--diff",
+            "src/",
+            "--exclude",
+            "*.pyc,__pycache__,.pytest_cache,.git,.venv,.ruff_cache,build,dist,*.egg-info",
+        ]
+    )
+
+
+def ruff_format_fix() -> None:
+    """Run ruff formatter and fix the files."""
+    subprocess.run(
+        [
+            "ruff",
+            "format",
+            "src/",
+            "--exclude",
+            "*.pyc,__pycache__,.pytest_cache,.git,.venv,.ruff_cache,build,dist,*.egg-info",
+        ]
+    )
+
+
+def ruff_lint_fix() -> None:
+    """Run ruff linter."""
+    subprocess.run(["ruff", "check", "src/", "--fix"])
 
 
 def makemigrations() -> None:
@@ -81,14 +111,14 @@ def makemigrations() -> None:
     result = subprocess.run(
         ["alembic", "revision", "--autogenerate", "-m", message],
         capture_output=True,
-        text=True
+        text=True,
     )
 
     if result.returncode == 0:
         print("✅ Successfully generated new migration")
         print("\nGenerated files:")
         # Extract migration file names from output
-        for line in result.stdout.split('\n'):
+        for line in result.stdout.split("\n"):
             if "migrations/versions/" in line:
                 print(f"  {line.strip()}")
     else:
@@ -105,9 +135,7 @@ def migrate() -> None:
 
     # Apply migrations
     result = subprocess.run(
-        ["alembic", "upgrade", "head"],
-        capture_output=True,
-        text=True
+        ["alembic", "upgrade", "head"], capture_output=True, text=True
     )
 
     if result.returncode == 0:
@@ -121,7 +149,9 @@ def migrate() -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m src.settings.run [dev|prod|format|lint|makemigrations|migrate]")
+        print(
+            "Usage: python -m src.settings.run [dev|prod|format|format-fix|lint|lint-fix|makemigrations|migrate]"
+        )
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -131,17 +161,19 @@ if __name__ == "__main__":
     elif command == "prod":
         prod_command()
     elif command == "format":
-        ruff_fix()
+        ruff_format()
+    elif command == "format-fix":
+        ruff_format_fix()
     elif command == "lint":
         ruff_lint()
+    elif command == "lint-fix":
+        ruff_lint_fix()
     elif command == "makemigrations":
         makemigrations()
     elif command == "migrate":
         migrate()
     else:
-        print("Invalid command. Use 'dev', 'prod', 'format', 'lint', 'makemigrations', or 'migrate'")
+        print(
+            "Invalid command. Use 'dev', 'prod', 'format','format-fix', 'lint','lint-fix', 'makemigrations', or 'migrate'"
+        )
         sys.exit(1)
-
-
-
-

@@ -1,4 +1,5 @@
 """Models package."""
+
 from src.app.models.permission import Permission
 from src.app.models.post import Post
 from src.app.models.role import Role

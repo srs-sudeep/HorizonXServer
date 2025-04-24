@@ -1,4 +1,5 @@
 """Base database models and utilities."""
+
 from datetime import datetime
 from typing import Any, Dict, Optional
 

@@ -1,4 +1,5 @@
 """Cache utilities."""
+
 from typing import Any, Callable, Optional, Union
 
 from fastapi import Depends
@@ -36,19 +37,18 @@ def user_specific_cache_key(
     func,
     namespace: Optional[str] = "",
     user: User = Depends(get_current_user),
-    **kwargs
+    **kwargs,
 ):
     """
     Create cache key based on user.
-    
+
     Args:
         func: The function being cached
         namespace: Optional cache namespace
         user: Current user from dependency
         kwargs: Additional arguments
-        
+
     Returns:
         Cache key string including username
     """
     return f"{namespace}:{func.__name__}:user:{user.username}"
-

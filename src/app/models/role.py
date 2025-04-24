@@ -1,4 +1,5 @@
 """Role model for RBAC."""
+
 from typing import List
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
@@ -22,10 +23,9 @@ class Role(Base):
     description = Column(String, nullable=True)
 
     # Relationships
-    users: Mapped[List["User"]] = relationship( # type: ignore
+    users: Mapped[List["User"]] = relationship(  # type: ignore
         "User", secondary="user_role", back_populates="roles"
     )
-    permissions: Mapped[List["Permission"]] = relationship( # type: ignore
+    permissions: Mapped[List["Permission"]] = relationship(  # type: ignore
         "Permission", secondary=role_permission, back_populates="roles"
     )
-

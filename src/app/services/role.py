@@ -1,4 +1,5 @@
 """Role service."""
+
 from typing import List, Optional, Union
 
 from fastapi import Depends, HTTPException, status
@@ -90,9 +91,7 @@ class RoleService:
         await self.db.refresh(role)
         return role
 
-    async def update(
-        self, role: Role, role_in: Union[RoleUpdate, dict]
-    ) -> Role:
+    async def update(self, role: Role, role_in: Union[RoleUpdate, dict]) -> Role:
         """
         Update role.
 
@@ -104,7 +103,11 @@ class RoleService:
             Updated role
         """
         # Convert to dict if not already
-        update_data = role_in if isinstance(role_in, dict) else role_in.model_dump(exclude_unset=True)
+        update_data = (
+            role_in
+            if isinstance(role_in, dict)
+            else role_in.model_dump(exclude_unset=True)
+        )
 
         # Update role
         for field, value in update_data.items():

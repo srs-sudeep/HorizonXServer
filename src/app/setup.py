@@ -1,4 +1,5 @@
 """Application setup module."""
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -20,7 +21,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan."""
     # Setup logging
     setup_logging()
-    
+
     try:
         # Test PostgreSQL connection
         async with engine.connect() as conn:
@@ -57,7 +58,7 @@ async def lifespan(app: FastAPI):
         # Close Redis connection
         await redis.close()
         logger.info("Redis connection closed")
-        
+
         # Close PostgreSQL connection pool
         await engine.dispose()
         logger.info("PostgreSQL connection pool closed")
@@ -68,7 +69,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """
     Create FastAPI application.
-    
+
     Returns:
         FastAPI application
     """
@@ -99,16 +100,16 @@ def create_app() -> FastAPI:
         response = {
             "message": "Welcome to FastAPI Boilerplate",
         }
-        
+
         # Only include docs links in development
         if settings.APP_ENV == "development":
-            response.update({
-                "docs": "/docs",
-                "redoc": "/redoc",
-            })
-            
+            response.update(
+                {
+                    "docs": "/docs",
+                    "redoc": "/redoc",
+                }
+            )
+
         return response
 
     return app
-
-

@@ -1,4 +1,5 @@
 """Exception handlers."""
+
 import traceback
 from typing import Any, Dict
 
@@ -48,9 +49,7 @@ async def validation_exception_handler(
     """
     # Log the validation error
     error_details = exc.errors()
-    logger.error(
-        f"Validation Error on {request.url.path}: {error_details}"
-    )
+    logger.error(f"Validation Error on {request.url.path}: {error_details}")
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

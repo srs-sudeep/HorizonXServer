@@ -1,4 +1,5 @@
 """Authentication endpoints."""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +31,7 @@ async def login(
         HTTPException: If credentials are invalid
     """
     auth_service = AuthService(db)
-    
+
     # Authenticate user
     user = await auth_service.authenticate(login_data.username, login_data.password)
     if not user:
@@ -55,10 +56,3 @@ async def refresh_token(
     auth_service = AuthService(db)
     tokens = await auth_service.refresh_tokens(refresh_token.refresh_token)
     return Token(**tokens)
-
-
-
-
-
-
-

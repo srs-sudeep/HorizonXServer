@@ -1,4 +1,5 @@
 """Main application module."""
+
 from dotenv import load_dotenv
 
 from src.app.setup import create_app
