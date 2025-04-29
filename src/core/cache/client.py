@@ -1,6 +1,5 @@
 """Redis cache client."""
 
-from typing import Any, Optional
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend

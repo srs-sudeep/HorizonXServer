@@ -1,7 +1,6 @@
 """Exception handlers."""
 
 import traceback
-from typing import Any, Dict
 
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError

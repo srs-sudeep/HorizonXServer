@@ -1,11 +1,13 @@
 """Role model for RBAC."""
 
-from typing import List
-
+from typing import List,TYPE_CHECKING
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import Mapped, relationship
-
 from src.core.db import Base
+if TYPE_CHECKING:
+    # Avoid circular import
+    from src.app.models.user import User
+    from src.app.models.permission import Permission
 
 # Role-Permission association table
 role_permission = Table(

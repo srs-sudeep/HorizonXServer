@@ -1,13 +1,12 @@
 """API dependencies."""
 
-from typing import Generator, List, Optional
+from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.models.permission import Permission
 from src.app.models.user import User
 from src.app.schemas.auth import TokenPayload
 from src.app.services.user import UserService

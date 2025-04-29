@@ -1,13 +1,12 @@
 """Cache utilities."""
 
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional
 
 from fastapi import Depends
 from fastapi_cache.decorator import cache
 
 from src.app.api.deps import get_current_user
 from src.app.models.user import User
-from src.core.config import settings
 
 
 def cached(

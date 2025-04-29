@@ -1,9 +1,8 @@
 """Application configuration module."""
 
-import os
-from typing import List, Optional, Union
+from typing import List, Union
 
-from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn, field_validator
+from pydantic import PostgresDsn, RedisDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

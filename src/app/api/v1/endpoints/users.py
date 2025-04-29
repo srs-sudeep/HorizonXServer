@@ -5,17 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.api.deps import get_current_user, get_db
 from src.app.models.user import User
-from src.app.schemas import UserCreate, User
+from src.app.schemas import UserCreate, User as UserResponse
 from src.app.services.user import UserService
 
 router = APIRouter()
 
 
-@router.post("/", response_model=User)
+@router.post("/", response_model=UserResponse)
 async def create_user(
     user_in: UserCreate,
     db: AsyncSession = Depends(get_db),
-) -> User:
+) -> UserResponse:
     """Create new user."""
     user_service = UserService(db)
     existing_user = await user_service.get_by_email(user_in.email)

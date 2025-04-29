@@ -5,7 +5,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.api.deps import get_current_superuser, get_db, has_permission
+from src.app.api.deps import get_db, has_permission
 from src.app.models.user import User
 from src.app.schemas.permission import Permission, PermissionCreate, PermissionUpdate
 from src.app.schemas.role import Role, RoleCreate, RoleUpdate

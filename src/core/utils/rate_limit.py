@@ -3,7 +3,7 @@
 import time
 from typing import Callable, Dict, Optional, Tuple
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import HTTPException, Request, status
 from redis import asyncio as aioredis
 
 from src.core.config import settings
