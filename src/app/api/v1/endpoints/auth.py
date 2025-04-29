@@ -3,10 +3,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.schemas.auth import Login, RefreshToken, Token
-from src.app.services.auth import AuthService
-from src.core.utils.rate_limit import create_rate_limiter
-from src.core.db.session import get_db
+from src.app.schemas import Login, RefreshToken, Token
+from src.app.services import AuthService
+from src.core.utils import create_rate_limiter
+from src.core.db import get_db
 
 router = APIRouter()
 

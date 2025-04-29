@@ -5,9 +5,8 @@ from typing import List, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.models.post import Post
-from src.app.models.user import User
-from src.app.schemas.post import PostCreate, PostUpdate
+from src.app.models import Post,User
+from src.app.schemas import PostCreate, PostUpdate
 
 
 class PostService:

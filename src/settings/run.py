@@ -146,6 +146,38 @@ def migrate() -> None:
         print(result.stderr)
         sys.exit(1)
 
+def pre_commit() -> None:
+    try:
+        subprocess.run(["pre-commit", "install"], check=True)
+        print("Pre-commit hooks installed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error installing pre-commit hooks: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        sys.exit(1)
+        
+def commit() -> None:
+    
+    import subprocess
+
+    try:
+        # Run pre-commit hooks
+        print("Running pre-commit hooks...")
+        subprocess.run(["pre-commit", "run", "--all-files"], check=True)
+
+        # Stage all changes
+        print("Staging changes...")
+        subprocess.run(["git", "add", "."], check=True)
+
+        # Run commitizen
+        print("Running commitizen...")
+        subprocess.run(["cz", "commit"], check=True)
+
+        print("✅ Commit process completed successfully!")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ An error occurred: {e}")
+        exit(1)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -172,8 +204,12 @@ if __name__ == "__main__":
         makemigrations()
     elif command == "migrate":
         migrate()
+    elif command == "pre-commit":
+        pre_commit()
+    elif command == "commit":
+        commit()
     else:
         print(
-            "Invalid command. Use 'dev', 'prod', 'format','format-fix', 'lint','lint-fix', 'makemigrations', or 'migrate'"
+            "Invalid command. Use 'dev', 'prod', 'format','format-fix', 'lint','lint-fix', 'makemigrations','pre-commit','commit', or 'migrate'"
         )
         sys.exit(1)

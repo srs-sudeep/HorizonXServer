@@ -7,11 +7,10 @@ from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.models.user import User
-from src.app.schemas.auth import TokenPayload
+from src.app.models import User
+from src.app.schemas import TokenPayload
 from src.app.services.user import UserService
-from src.core.security import create_access_token, create_refresh_token
-from src.core.config import settings
+from src.core import create_access_token, create_refresh_token,settings
 
 
 class AuthService:

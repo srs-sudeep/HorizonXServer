@@ -4,13 +4,11 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.app.api.deps import get_db, has_permission
-from src.app.models.user import User
-from src.app.schemas.permission import Permission, PermissionCreate, PermissionUpdate
-from src.app.schemas.role import Role, RoleCreate, RoleUpdate
-from src.app.services.permission import PermissionService
-from src.app.services.role import RoleService
+from src.core.db import get_db
+from src.app.api import has_permission
+from src.app.models import User
+from src.app.schemas import Permission, PermissionCreate, PermissionUpdate,Role, RoleCreate, RoleUpdate
+from src.app.services import PermissionService, RoleService
 
 router = APIRouter()
 

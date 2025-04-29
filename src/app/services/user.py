@@ -5,8 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.app.models.user import User
-from src.app.schemas.user import UserCreate
+from src.app.models import User
+from src.app.schemas import UserCreate
 from src.core.security import get_password_hash, verify_password
 from .base import BaseService
 

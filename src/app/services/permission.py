@@ -6,8 +6,8 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.models.permission import Permission
-from src.app.schemas.permission import PermissionCreate, PermissionUpdate
+from src.app.models import Permission
+from src.app.schemas import PermissionCreate, PermissionUpdate
 
 
 class PermissionService:

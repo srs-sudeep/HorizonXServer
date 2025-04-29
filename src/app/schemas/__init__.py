@@ -9,7 +9,7 @@ from src.app.schemas.permission import (
 )
 from src.app.schemas.role import Role, RoleCreate, RoleInDB, RoleUpdate
 from src.app.schemas.user import User, UserCreate, UserInDB, UserUpdate
-
+from src.app.schemas.post import Post, PostCreate, PostInDB, PostUpdate 
 __all__ = [
     "User",
     "UserCreate",
@@ -27,4 +27,8 @@ __all__ = [
     "TokenPayload",
     "Login",
     "RefreshToken",
+    "Post",
+    "PostCreate",
+    "PostUpdate",
+    "PostInDB",
 ]

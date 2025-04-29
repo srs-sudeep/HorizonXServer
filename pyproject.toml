@@ -38,6 +38,8 @@ dependencies = [
     "hatchling",
     "mypy",
     "ruff",
+    "pre-commit",
+    "commitizen",
 ]
 
 
@@ -52,6 +54,8 @@ lint-fix = "src.settings.run:ruff_lint_fix"
 makemigrations = "src.settings.run:makemigrations"
 migrate = "src.settings.run:migrate"
 createsuperuser = "scripts.create_superuser:main"
+pre-commit = "src.settings.run:pre_commit"
+commit = "src.settings.run:commit_command"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]

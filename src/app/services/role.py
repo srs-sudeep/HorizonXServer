@@ -7,9 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.app.models.role import Role
-from src.app.schemas.role import RoleCreate, RoleUpdate
-from src.core.db.session import get_db
+from src.app.models import Role
+from src.app.schemas import RoleCreate, RoleUpdate
+from src.core.db import get_db
 
 
 class RoleService:

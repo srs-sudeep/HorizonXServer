@@ -4,12 +4,12 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.app.api.deps import get_db, has_permission
-from src.app.models.user import User
-from src.app.schemas.post import Post, PostCreate, PostUpdate
-from src.app.services.post import PostService
-from src.core.cache.utils import cached, user_specific_cache_key
+from src.core.db import get_db
+from src.app.api import has_permission
+from src.app.models import User
+from src.app.schemas import Post, PostCreate, PostUpdate
+from src.app.services import PostService
+from src.core.cache import cached, user_specific_cache_key
 
 router = APIRouter()
 
