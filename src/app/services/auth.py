@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.models import User
 from src.app.schemas import TokenPayload
 from src.app.services.user import UserService
-from src.core import create_access_token, create_refresh_token,settings
+from src.core import create_access_token, create_refresh_token, settings
 
 
 class AuthService:

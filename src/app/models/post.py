@@ -4,9 +4,11 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, relationship
 from src.core.db import Base
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     # Avoid circular import
     from src.app.models.user import User
+
 
 class Post(Base):
     """Post model."""

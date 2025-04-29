@@ -5,6 +5,7 @@ from sqlalchemy import Column, String
 from sqlalchemy.orm import Mapped, relationship
 from src.core.db import Base
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from src.app.models.role import Role
 
