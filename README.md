@@ -66,12 +66,14 @@ fastapi-boilerplate/
 ### Local Development
 
 1. Clone the repository:
+
 ```bash
 git clone <your-repository-url>
 cd fastapi-boilerplate
 ```
 
 2. Install dependencies using UV (this will install the latest versions of all packages):
+
 ```bash
 # On Windows
 install_latest.bat
@@ -83,16 +85,19 @@ uv pip install -e .
 ```
 
 3. Set up PostgreSQL and Redis locally or using Docker:
+
 ```bash
 docker-compose up -d postgres redis
 ```
 
 4. Initialize the database:
+
 ```bash
 uv run init-db
 ```
 
 5. Run the development server:
+
 ```bash
 uv run dev
 ```
@@ -100,6 +105,7 @@ uv run dev
 ### Docker Deployment
 
 1. Build and run the Docker containers:
+
 ```bash
 docker-compose up -d
 ```
@@ -107,26 +113,31 @@ docker-compose up -d
 ## Available Commands
 
 - Run the development server:
+
 ```bash
 uv run dev
 ```
 
 - Run the production server:
+
 ```bash
 uv run prod
 ```
 
 - Format code using Ruff:
+
 ```bash
 uv run format
 ```
 
 - Lint code using Ruff:
+
 ```bash
 uv run lint
 ```
 
 - Initialize the database:
+
 ```bash
 uv run init-db
 ```
@@ -136,14 +147,17 @@ uv run init-db
 This project uses UV along with Poetry for package management. UV is a fast Python package installer and resolver.
 
 - Install all packages defined in pyproject.toml:
+
 ```bash
 uv pip install -e .
 ```
 
 - Add a new package:
+
 ```bash
 uv pip install package_name
 ```
+
 Then add it to the dependencies list in pyproject.toml.
 
 ## Running Redis on Windows Using WSL
@@ -153,6 +167,7 @@ Redis doesn't officially support Windows. The recommended approach is to use Win
 ### 1. Install WSL
 
 1. Open PowerShell as Administrator and run:
+
 ```powershell
 wsl --install
 ```
@@ -164,29 +179,35 @@ wsl --install
 ### 2. Install Redis on WSL
 
 1. Open your WSL terminal (Ubuntu) and update the package lists:
+
 ```bash
 sudo apt update
 ```
 
 2. Install Redis:
+
 ```bash
 sudo apt install redis-server
 ```
 
 3. Start the Redis service:
+
 ```bash
 sudo service redis-server start
 ```
 
 4. Verify Redis is running:
+
 ```bash
 redis-cli ping
 ```
+
 If Redis is running correctly, it should respond with "PONG".
 
 ### 3. Configure Redis for External Access
 
 1. Edit the Redis configuration file:
+
 ```bash
 sudo nano /etc/redis/redis.conf
 ```
@@ -198,6 +219,7 @@ sudo nano /etc/redis/redis.conf
 4. Save and exit (Ctrl+O, Enter, Ctrl+X).
 
 5. Restart Redis:
+
 ```bash
 sudo systemctl restart redis-server
 ```
@@ -205,6 +227,7 @@ sudo systemctl restart redis-server
 ### 4. Connect to Redis from Your Application
 
 Update your `.env.development` file to point to the WSL Redis instance:
+
 ```
 REDIS_URL=redis://localhost:6379/0
 ```
@@ -212,11 +235,13 @@ REDIS_URL=redis://localhost:6379/0
 ### 5. Starting and Stopping Redis
 
 Start Redis:
+
 ```bash
 sudo service redis-server start
 ```
 
 Stop Redis:
+
 ```bash
 sudo service redis-server stop
 ```
@@ -296,11 +321,13 @@ This project implements a comprehensive Role-Based Access Control (RBAC) system 
 ### Core Components
 
 1. **Users**
+
    - Can have multiple roles
    - Can be superusers (bypass all permission checks)
    - Authenticated using JWT tokens
 
 2. **Roles**
+
    - Named collections of permissions (e.g., "admin", "editor", "viewer")
    - Can have multiple permissions
    - Users can have multiple roles
@@ -315,6 +342,7 @@ This project implements a comprehensive Role-Based Access Control (RBAC) system 
 Permissions follow the format: `resource:action`
 
 Common actions include:
+
 - `create`: Create new resources
 - `read`: View resources
 - `update`: Modify existing resources
@@ -322,6 +350,7 @@ Common actions include:
 - `*`: All actions on a resource
 
 Examples:
+
 ```python
 # Full access to posts
 Permission(resource="posts", action="*")
@@ -337,6 +366,7 @@ Permission(resource="products", action="update")
 ### Usage Examples
 
 1. **Protecting API Endpoints**
+
 ```python
 from src.app.api.deps import has_permission
 
@@ -357,6 +387,7 @@ async def list_users(
 ```
 
 2. **Creating Roles and Permissions**
+
 ```python
 # Create an editor role
 editor_role = Role(
@@ -374,6 +405,7 @@ editor_role.permissions.extend(editor_permissions)
 ```
 
 3. **Assigning Roles to Users**
+
 ```python
 # Assign editor role to user
 user.roles.append(editor_role)
@@ -390,6 +422,7 @@ await db.commit()
 ### Managing RBAC
 
 1. **Creating a Superuser**
+
 ```bash
 # Using CLI
 uv run createsuperuser
@@ -398,6 +431,7 @@ uv run createsuperuser
 ```
 
 2. **API Endpoints for RBAC Management**
+
 - `POST /api/v1/roles/` - Create new role
 - `GET /api/v1/roles/` - List all roles
 - `PUT /api/v1/roles/{role_id}` - Update role
@@ -408,6 +442,7 @@ uv run createsuperuser
 - `DELETE /api/v1/permissions/{permission_id}` - Delete permission
 
 3. **Checking Permissions in Code**
+
 ```python
 # Check if user has specific permission
 for role in user.roles:
@@ -430,11 +465,13 @@ async def create_post(
 ### Best Practices
 
 1. **Permission Naming**
+
    - Use lowercase for resources and actions
    - Use descriptive names (e.g., "user_profiles" instead of "profiles")
    - Be consistent with action names (create, read, update, delete)
 
 2. **Role Design**
+
    - Follow the principle of least privilege
    - Create roles based on job functions
    - Avoid giving more permissions than necessary
@@ -447,6 +484,7 @@ async def create_post(
    - Log permission checks and role changes
 
 ## Rate Limits
+
 Rate limiting can be configured in the `.env` file:
 
 - **Enable/Disable Rate Limiting**: Set `RATE_LIMIT_ENABLED` to `true` or `false`.
@@ -495,7 +533,88 @@ If a client exceeds the rate limit, they will receive a `429 Too Many Requests` 
 }
 ```
 
+## Caching
 
+This project includes a caching mechanism to improve performance by reducing redundant computations or database queries. It uses Redis as the backend for caching.
+
+### How It Works
+
+- The `fastapi-cache` library is used to implement caching.
+- A decorator `cached` is provided to cache the results of API endpoints or functions.
+- Cache keys can be customized using a `key_builder` function.
+- User-specific cache keys can be generated using the `user_specific_cache_key` utility.
+
+### Configuration
+
+Caching can be configured in the `.env` file:
+
+- **Redis URL**: Set `REDIS_URL` to the Redis connection string.
+
+Example configuration in `.env.development`:
+
+```env
+# Redis configuration
+REDIS_URL=redis://localhost:6379/0
+```
+
+### Usage in Code
+
+1. **Basic Caching**:
+   Use the `cached` decorator to cache the results of an API endpoint or function. For example:
+
+   ```python
+   from fastapi import APIRouter
+   from src.core.cache.utils import cached
+
+   router = APIRouter()
+
+   @router.get("/example")
+   @cached(expire=60)  # Cache for 60 seconds
+   async def example_endpoint():
+       return {"message": "This response is cached."}
+   ```
+
+2. **Custom Cache Keys**:
+   Use the `user_specific_cache_key` utility to create user-specific cache keys. For example:
+
+   ```python
+   from fastapi import APIRouter
+   from src.core.cache.utils import cached, user_specific_cache_key
+
+   router = APIRouter()
+
+   @router.get("/user-data")
+   @cached(expire=120, key_builder=user_specific_cache_key)  # Cache for 120 seconds
+   async def user_data_endpoint():
+       return {"message": "This response is cached per user."}
+   ```
+
+3. **Custom Key Builder**:
+   You can define your own key builder function to customize cache keys. For example:
+
+   ```python
+   def custom_key_builder(func, namespace: str = "", **kwargs):
+       return f"{namespace}:{func.__name__}:custom_key"
+
+   @router.get("/custom-cache")
+   @cached(expire=30, key_builder=custom_key_builder)  # Cache for 30 seconds
+   async def custom_cache_endpoint():
+       return {"message": "This response uses a custom cache key."}
+   ```
+
+### Cache Invalidation
+
+To invalidate a cache entry, you can use the `fastapi-cache` API to delete the corresponding key from Redis.
+
+### Example Response
+
+When caching is enabled, subsequent requests to the same endpoint will return the cached response until the cache expires.
+
+```json
+{
+  "message": "This response is cached."
+}
+```
 
 ## Contributing
 
