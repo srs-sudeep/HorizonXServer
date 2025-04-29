@@ -446,6 +446,57 @@ async def create_post(
    - Keep superuser access limited
    - Log permission checks and role changes
 
+## Rate Limits
+Rate limiting can be configured in the `.env` file:
+
+- **Enable/Disable Rate Limiting**: Set `RATE_LIMIT_ENABLED` to `true` or `false`.
+- **Default Rate Limit**: Set `RATE_LIMIT_DEFAULT` to a value like `100/minute` (100 requests per minute).
+
+Example configuration in `.env.development`:
+
+```env
+# Rate limiting
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_DEFAULT=100/minute
+```
+
+### Usage in Code
+
+The rate limiter is implemented as a dependency that can be added to any FastAPI route. For example:
+
+```python
+from fastapi import APIRouter, Depends
+from src.core.utils.rate_limit import create_rate_limiter
+
+router = APIRouter()
+
+@router.get("/example")
+async def example_endpoint(
+    _: None = Depends(create_rate_limiter(5, 60)),  # 5 requests per minute
+):
+    return {"message": "This endpoint is rate-limited."}
+```
+
+### Headers for Rate Limit Information
+
+When rate limiting is enabled, the following headers are added to responses:
+
+- `X-RateLimit-Limit`: The maximum number of requests allowed.
+- `X-RateLimit-Remaining`: The number of requests remaining in the current time window.
+- `X-RateLimit-Reset`: The time (in seconds) until the rate limit resets.
+
+### Example Response
+
+If a client exceeds the rate limit, they will receive a `429 Too Many Requests` response:
+
+```json
+{
+  "detail": "Too many requests"
+}
+```
+
+
+
 ## Contributing
 
 1. Fork the repository
