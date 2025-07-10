@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.app.models import Role
+from src.app.models import Role, Permission
 from src.app.schemas import RoleCreate, RoleUpdate
 from src.core.db import get_db
 
@@ -36,7 +36,7 @@ class RoleService:
         """
         query = (
             select(Role)
-            .where(Role.id == role_id)
+            .where(Role.role_id == role_id)
             .options(selectinload(Role.permissions))
         )
         result = await self.db.execute(query)
@@ -147,4 +147,74 @@ class RoleService:
             .limit(limit)
         )
         result = await self.db.execute(query)
-        return result.scalars().all()
+        roles = result.scalars().all()
+        print(roles)
+        return list(roles)
+
+    async def add_permission(self, role_id: int, permission_id: int) -> Role:
+        """
+        Add a permission to a role.
+
+        Args:
+            role_id: Role ID
+            permission_id: Permission ID
+
+        Returns:
+            Updated role
+
+        Raises:
+            HTTPException: If role or permission not found
+        """
+        # Fetch the role and permission
+        role = await self.get_by_id(role_id)
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found")
+        permission_query = select(Permission).where(
+            Permission.permission_id == permission_id
+        )
+        result = await self.db.execute(permission_query)
+        permission = result.scalar_one_or_none()
+        if not permission:
+            raise HTTPException(status_code=404, detail="Permission not found")
+
+        # Add permission if not already present
+        if permission not in role.permissions:
+            role.permissions.append(permission)
+            self.db.add(role)
+            await self.db.commit()
+            await self.db.refresh(role)
+        return role
+
+    async def remove_permission(self, role_id: int, permission_id: int) -> Role:
+        """
+        Remove a permission from a role.
+
+        Args:
+            role_id: Role ID
+            permission_id: Permission ID
+
+        Returns:
+            Updated role
+
+        Raises:
+            HTTPException: If role or permission not found
+        """
+        # Fetch the role and permission
+        role = await self.get_by_id(role_id)
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found")
+        permission_query = select(Permission).where(
+            Permission.permission_id == permission_id
+        )
+        result = await self.db.execute(permission_query)
+        permission = result.scalar_one_or_none()
+        if not permission:
+            raise HTTPException(status_code=404, detail="Permission not found")
+
+        # Remove permission if present
+        if permission in role.permissions:
+            role.permissions.remove(permission)
+            self.db.add(role)
+            await self.db.commit()
+            await self.db.refresh(role)
+        return role

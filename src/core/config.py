@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str
     SECRET_KEY: str
     API_V1_STR: str = "/api/v1"
+    PROXY_ROUTE: str = "core"
     PROJECT_NAME: str = "FastAPI Boilerplate"
 
     # CORS settings
@@ -34,6 +35,11 @@ class Settings(BaseSettings):
 
     # Database settings
     DATABASE_URL: PostgresDsn
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5432
+    DB_NAME: str = "fastapi_db"
+    DB_USER: str = "postgres"
+    DB_PASSWORD: str = "postgres"
 
     # Redis settings
     REDIS_URL: RedisDsn

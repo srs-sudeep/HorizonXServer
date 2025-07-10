@@ -9,19 +9,28 @@ if TYPE_CHECKING:
     # Avoid circular import
     from src.app.models.user import User
     from src.app.models.permission import Permission
+    from src.app.models.route import Route
 
 # Role-Permission association table
 role_permission = Table(
     "role_permission",
     Base.metadata,
-    Column("role_id", Integer, ForeignKey("role.id"), primary_key=True),
-    Column("permission_id", Integer, ForeignKey("permission.id"), primary_key=True),
+    Column("role_id", Integer, ForeignKey("role.role_id"), primary_key=True),
+    Column(
+        "permission_id",
+        Integer,
+        ForeignKey("permission.permission_id"),
+        primary_key=True,
+    ),
 )
 
 
 class Role(Base):
     """Role model."""
 
+    role_id = Column(
+        Integer, primary_key=True, index=True, autoincrement=True, nullable=False
+    )
     name = Column(String, unique=True, index=True, nullable=False)
     description = Column(String, nullable=True)
 
@@ -31,4 +40,7 @@ class Role(Base):
     )
     permissions: Mapped[List["Permission"]] = relationship(  # type: ignore
         "Permission", secondary=role_permission, back_populates="roles"
+    )
+    routes: Mapped[List["Route"]] = relationship(  # type: ignore
+        "Route", secondary="route_role", back_populates="roles"
     )

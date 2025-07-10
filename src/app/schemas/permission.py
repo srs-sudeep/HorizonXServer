@@ -14,6 +14,7 @@ class PermissionBase(BaseModel):
     description: Optional[str] = None
     resource: str
     action: str
+    expression: Optional[dict] = None
 
 
 # Permission creation schema
@@ -31,13 +32,14 @@ class PermissionUpdate(BaseModel):
     description: Optional[str] = None
     resource: Optional[str] = None
     action: Optional[str] = None
+    expression: Optional[dict] = None
 
 
 # Permission in DB schema
 class PermissionInDB(PermissionBase):
     """Permission in DB schema."""
 
-    id: int
+    permission_id: int
     created_at: datetime
     updated_at: datetime
 
@@ -52,3 +54,16 @@ class Permission(PermissionInDB):
     """Permission response schema."""
 
     pass
+
+
+class PermissionWithSelected(BaseModel):
+    permission_id: int
+    name: str
+    description: Optional[str] = None
+    resource: str
+    action: str
+    selected: bool
+    expression: Optional[dict] = None
+
+    class Config:
+        from_attributes = True

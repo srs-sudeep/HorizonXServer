@@ -6,10 +6,19 @@ from src.app.schemas.permission import (
     PermissionCreate,
     PermissionInDB,
     PermissionUpdate,
+    PermissionWithSelected,
 )
 from src.app.schemas.role import Role, RoleCreate, RoleInDB, RoleUpdate
 from src.app.schemas.user import User, UserCreate, UserInDB, UserUpdate
 from src.app.schemas.post import Post, PostCreate, PostInDB, PostUpdate
+from src.app.schemas.module import (
+    ModuleBase,
+    ModuleCreate,
+    ModuleResponse,
+    ModuleUpdate,
+)
+from src.app.schemas.route import RouteBase, RouteCreate, RouteResponse, RouteUpdate
+from src.app.schemas.sidebar import SidebarModuleItem, SidebarRouteItem
 
 __all__ = [
     "User",
@@ -24,6 +33,7 @@ __all__ = [
     "PermissionCreate",
     "PermissionUpdate",
     "PermissionInDB",
+    "PermissionWithSelected",
     "Token",
     "TokenPayload",
     "Login",
@@ -32,4 +42,14 @@ __all__ = [
     "PostCreate",
     "PostUpdate",
     "PostInDB",
+    "ModuleBase",
+    "ModuleCreate",
+    "ModuleUpdate",
+    "ModuleResponse",
+    "RouteBase",
+    "RouteCreate",
+    "RouteUpdate",
+    "RouteResponse",
+    "SidebarModuleItem",
+    "SidebarRouteItem",
 ]

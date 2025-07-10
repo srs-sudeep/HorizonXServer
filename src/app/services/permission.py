@@ -5,8 +5,9 @@ from typing import List, Optional
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from src.app.models import Permission
+from src.app.models import Permission, Role
 from src.app.schemas import PermissionCreate, PermissionUpdate
 
 
@@ -19,9 +20,22 @@ class PermissionService:
 
     async def get(self, permission_id: int) -> Optional[Permission]:
         """Get permission by ID."""
-        query = select(Permission).where(Permission.id == permission_id)
+        query = select(Permission).where(Permission.permission_id == permission_id)
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_policies(self, role_names: list[str], resource: str, action: str):
+        stmt = (
+            select(Permission)
+            .join(Permission.roles)
+            .where(
+                Role.name.in_(role_names),
+                Permission.resource == resource,
+                Permission.action == action,
+            )
+        )
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
     async def get_by_name(self, name: str) -> Optional[Permission]:
         """Get permission by name."""
@@ -29,7 +43,7 @@ class PermissionService:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_multi(self, skip: int = 0, limit: int = 100) -> List[Permission]:
+    async def get_multi(self, skip: int = 0, limit: int = 300) -> List[Permission]:
         """Get multiple permissions."""
         query = select(Permission).offset(skip).limit(limit)
         result = await self.db.execute(query)
@@ -68,3 +82,36 @@ class PermissionService:
         if permission:
             await self.db.delete(permission)
             await self.db.commit()
+
+    async def get_all_with_role_selected(self, role_id: int):
+        # Get all permissions
+        all_permissions_query = select(Permission)
+        all_permissions_result = await self.db.execute(all_permissions_query)
+        all_permissions = all_permissions_result.scalars().all()
+
+        # Get the role and its permissions, eagerly loading permissions
+        role_query = (
+            select(Role)
+            .where(Role.role_id == role_id)
+            .options(selectinload(Role.permissions))
+        )
+        role_result = await self.db.execute(role_query)
+        role = role_result.scalar_one_or_none()
+        role_permission_ids = (
+            {p.permission_id for p in getattr(role, "permissions", [])}
+            if role
+            else set()
+        )
+
+        # Build response
+        return [
+            {
+                "permission_id": perm.permission_id,
+                "name": perm.name,
+                "description": perm.description,
+                "resource": perm.resource,
+                "action": perm.action,
+                "selected": perm.permission_id in role_permission_ids,
+            }
+            for perm in all_permissions
+        ]

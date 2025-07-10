@@ -149,17 +149,17 @@ def migrate() -> None:
 
 def pre_commit() -> None:
     try:
-        subprocess.run(["uv", "run", "lint-fix"], check=True)
+        subprocess.run(["poetry", "run", "lint-fix"], check=True)
         print("linting successfully done.")
 
-        subprocess.run(["uv", "run", "format-fix"], check=True)
+        subprocess.run(["poetry", "run", "format-fix"], check=True)
         print("formatting successfully done.")
 
         subprocess.run(["git", "add", "."], check=True)
         print("files added successfully.")
 
     except subprocess.CalledProcessError as e:
-        print(f"Error installing pre-commit hooks: {e}")
+        print(f"Error running pre-commit hooks: {e}")
         sys.exit(1)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
@@ -170,11 +170,11 @@ def commit() -> None:
     try:
         # Run pre-commit hooks
         print("Running pre-commit hooks...")
-        subprocess.run(["uv", "run", "pre-commit"], check=True)
+        subprocess.run(["poetry", "run", "pre-commit"], check=True)
 
         # Run commitizen
         print("Running commitizen...")
-        subprocess.run(["cz", "commit"], check=True)
+        subprocess.run(["poetry", "run", "cz", "commit"], check=True)
 
         print("✅ Commit process completed successfully!")
     except subprocess.CalledProcessError as e:

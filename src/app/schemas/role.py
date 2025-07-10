@@ -33,7 +33,7 @@ class RoleUpdate(BaseModel):
 class RoleInDB(RoleBase):
     """Role in DB schema."""
 
-    id: int
+    role_id: int
     created_at: datetime
     updated_at: datetime
 

@@ -14,6 +14,7 @@ from src.app.schemas import (
     Role,
     RoleCreate,
     RoleUpdate,
+    PermissionWithSelected,
 )
 from src.app.services import PermissionService, RoleService
 
@@ -29,7 +30,8 @@ async def create_role(
 ) -> Role:
     """Create new role."""
     role_service = RoleService(db)
-    return await role_service.create(role_in)
+    role = await role_service.create(role_in)
+    return Role.from_orm(role)
 
 
 @router.get("/roles", response_model=List[Role])
@@ -41,7 +43,7 @@ async def list_roles(
 ) -> List[Role]:
     """List roles."""
     role_service = RoleService(db)
-    return await role_service.get_multi(skip=skip, limit=limit)
+    return await role_service.get_all(skip=skip, limit=limit)
 
 
 @router.get("/roles/{role_id}", response_model=Role)
@@ -67,7 +69,7 @@ async def update_role(
 ) -> Role:
     """Update role."""
     role_service = RoleService(db)
-    role = await role_service.get(role_id)
+    role = await role_service.get_by_id(role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
     return await role_service.update(role, role_in)
@@ -81,10 +83,10 @@ async def delete_role(
 ) -> None:
     """Delete role."""
     role_service = RoleService(db)
-    role = await role_service.get(role_id)
+    role = await role_service.get_by_id(role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
-    await role_service.delete(role_id)
+    await role_service.delete(role)
 
 
 # Permission endpoints
@@ -102,7 +104,7 @@ async def create_permission(
 @router.get("/permissions", response_model=List[Permission])
 async def list_permissions(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 300,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(has_permission("permissions", "read")),
 ) -> List[Permission]:
@@ -177,3 +179,18 @@ async def remove_permission_from_role(
     """Remove permission from role."""
     role_service = RoleService(db)
     return await role_service.remove_permission(role_id, permission_id)
+
+
+@router.get(
+    "/roles/{role_id}/permissions/all", response_model=list[PermissionWithSelected]
+)
+async def get_all_permissions_with_role_selected(
+    role_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("roles", "read")),
+):
+    """
+    Get all permissions, marking those assigned to the role as selected.
+    """
+    permission_service = PermissionService(db)
+    return await permission_service.get_all_with_role_selected(role_id)
