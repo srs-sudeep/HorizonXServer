@@ -74,16 +74,20 @@ async def get_user_by_id(
     current_user: User = Depends(has_permission("users", "read")),
 ):
     service = UserService(db)
-    user = await service.get_by_ldapid(user_id)
+    user = await service.get_by_id(user_id)
     if not user:
-        user = await service.get_by_idNumber(user_id)
+        user = await service.get_by_email(user_id)
+    if not user:
+        user = await service.get_by_username(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     roles = [role.name for role in user.roles]
     return UserResponse(
-        ldapid=user.ldapid,
+        id=user.id,
         name=user.name,
-        idNumber=user.idNumber,
+        phoneNumber=user.phoneNumber,
+        email=user.email,
+        username=user.username,
         is_active=user.is_active,
         created_at=user.created_at,
         updated_at=user.updated_at,

@@ -18,31 +18,42 @@ class UserService(BaseService[User]):
         """Initialize service with database session."""
         super().__init__(db, User)
 
-    async def get_by_ldapid(self, ldapid: str) -> Optional[UserResponse]:
-        """Get user by LDAP ID."""
+    async def get_by_id(self, user_id: str) -> Optional[User]:
+        """Get user by ID."""
         query = (
-            select(User).where(User.ldapid == ldapid).options(selectinload(User.roles))
+            select(User).where(User.id == user_id).options(selectinload(User.roles))
         )
         result = await self.db.execute(query)
         user_obj = result.scalar_one_or_none()
         return user_obj
 
-    async def get_by_idNumber(self, idNumber: str) -> Optional[UserResponse]:
-        """Get user by ID Number."""
+    async def get_by_email(self, email: str) -> Optional[User]:
+        """Get user by email."""
         query = (
             select(User)
-            .where(User.idNumber == idNumber)
+            .where(User.email == email)
             .options(selectinload(User.roles))
         )
         result = await self.db.execute(query)
         user_obj = result.scalar_one_or_none()
         return user_obj
 
-    async def get_by_superadmin(self, ldapid: str) -> Optional[UserResponse]:
+    async def get_by_username(self, username: str) -> Optional[User]:
+        """Get user by username."""
+        query = (
+            select(User)
+            .where(User.username == username)
+            .options(selectinload(User.roles))
+        )
+        result = await self.db.execute(query)
+        user_obj = result.scalar_one_or_none()
+        return user_obj
+
+    async def get_by_superadmin(self, user_id: str) -> Optional[User]:
         query = (
             select(User)
             .join(User.roles)
-            .where(User.ldapid == ldapid, Role.name == "admin")
+            .where(User.id == user_id, Role.name == "admin")
         )
         result = await self.db.execute(query)
         user_obj = result.scalar_one_or_none()
@@ -51,20 +62,28 @@ class UserService(BaseService[User]):
     async def create(
         self,
         *,
-        ldapid: str,
-        idNumber: str,
+        id: str,
         name: str,
+        phoneNumber: str,
+        email: str,
+        username: str,
+        hashed_password: str,
         is_active: bool = True,
+        is_superuser: bool = False,
         roles=None,
     ) -> User:
         """Async create method for User with optional roles."""
         if roles is None:
             roles = []
         user = User(
-            ldapid=ldapid,
-            idNumber=idNumber,
+            id=id,
             name=name,
+            phoneNumber=phoneNumber,
+            email=email,
+            username=username,
+            hashed_password=hashed_password,
             is_active=is_active,
+            is_superuser=is_superuser,
             roles=roles,
         )
         self.db.add(user)
@@ -74,11 +93,11 @@ class UserService(BaseService[User]):
 
     async def create_user_if_not_exists(self, user: UserWithRoles) -> User:
         """Create new user if not exists."""
-        existing_user = await self.get_by_ldapid(user["ldapid"])
+        existing_user = await self.get_by_id(user["id"])
         if existing_user is not None:
             return existing_user
         roles = []
-        print(f"Creating user with LDAP ID: {user['ldapid']}")
+        print(f"Creating user with ID: {user['id']}")
         print(f"User details: {user['roles']}")
         if "roles" in user and user["roles"]:
             for name in user["roles"]:
@@ -89,20 +108,24 @@ class UserService(BaseService[User]):
                 if role_obj:
                     roles.append(role_obj)
         user_obj = await self.create(
-            ldapid=user["ldapid"],
-            idNumber=user["idNumber"],
+            id=user["id"],
             name=user["name"],
+            phoneNumber=user["phoneNumber"],
+            email=user["email"],
+            username=user["username"],
+            hashed_password=user.get("hashed_password", ""),
             is_active=user.get("is_active", True),
+            is_superuser=user.get("is_superuser", False),
             roles=roles,
         )
         return user_obj
 
-    async def authenticate(self, ldapid: str, password: str) -> Optional[User]:
+    async def authenticate(self, username: str, password: str) -> Optional[User]:
         """Authenticate user."""
-        user = await self.get_by_ldapid(ldapid)
+        user = await self.get_by_username(username)
         if not user:
             return None
-        if not verify_password(password, user.password):
+        if not verify_password(password, user.hashed_password):
             return None
         return user
 
@@ -117,9 +140,9 @@ class UserService(BaseService[User]):
             HTTPException: If the user has no roles assigned.
         """
         # Ensure roles are eagerly loaded
-        user = await self.get_by_ldapid(user.ldapid)
+        user = await self.get_by_id(user.id)
         if not user.roles or len(user.roles) == 0:
-            print(f"User {user.ldapid} has no roles assigned.")
+            print(f"User {user.id} has no roles assigned.")
             return False
         return True
 
@@ -149,9 +172,11 @@ class UserService(BaseService[User]):
             ]
             user_list.append(
                 {
-                    "ldapid": user.ldapid,
-                    "idNumber": user.idNumber,
+                    "id": user.id,
                     "name": user.name,
+                    "phoneNumber": user.phoneNumber,
+                    "email": user.email,
+                    "username": user.username,
                     "is_active": user.is_active,
                     "roles": roles_with_assigned,
                 }
@@ -161,7 +186,7 @@ class UserService(BaseService[User]):
     async def add_role(self, user_id: str, role_id: int):
         """Add a role to a user."""
         result = await self.db.execute(
-            select(User).where(User.ldapid == user_id).options(selectinload(User.roles))
+            select(User).where(User.id == user_id).options(selectinload(User.roles))
         )
         user = result.scalar_one_or_none()
         role = await self.db.get(Role, role_id)
@@ -173,10 +198,10 @@ class UserService(BaseService[User]):
             await self.db.refresh(user)
         return user
 
-    async def remove_role(self, user_id: int, role_id: int):
+    async def remove_role(self, user_id: str, role_id: int):
         """Remove a role from a user."""
         result = await self.db.execute(
-            select(User).where(User.ldapid == user_id).options(selectinload(User.roles))
+            select(User).where(User.id == user_id).options(selectinload(User.roles))
         )
         user = result.scalar_one_or_none()
         role = await self.db.get(Role, role_id)
@@ -205,8 +230,9 @@ class UserService(BaseService[User]):
             query = query.where(
                 or_(
                     func.lower(User.name).like(search_pattern),
-                    func.lower(User.ldapid).like(search_pattern),
-                    func.lower(User.idNumber).like(search_pattern),
+                    func.lower(User.email).like(search_pattern),
+                    func.lower(User.username).like(search_pattern),
+                    func.lower(User.phoneNumber).like(search_pattern),
                     User.roles.any(func.lower(Role.name).like(search_pattern)),
                 )
             )
@@ -219,7 +245,7 @@ class UserService(BaseService[User]):
         if roles:
             query = query.where(User.roles.any(Role.role_id.in_(roles)))
 
-        count_query = query.with_only_columns(func.count(User.ldapid)).order_by(None)
+        count_query = query.with_only_columns(func.count(User.id)).order_by(None)
         total_count = (await self.db.execute(count_query)).scalar_one()
 
         # Pagination
@@ -241,9 +267,11 @@ class UserService(BaseService[User]):
             ]
             user_list.append(
                 {
-                    "ldapid": user.ldapid,
-                    "idNumber": user.idNumber,
+                    "id": user.id,
                     "name": user.name,
+                    "phoneNumber": user.phoneNumber,
+                    "email": user.email,
+                    "username": user.username,
                     "is_active": user.is_active,
                     "roles": roles_with_assigned,
                 }

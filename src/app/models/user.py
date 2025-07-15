@@ -21,8 +21,10 @@ user_role = Table(
 
 class User(Base):
     """User model."""
-    id = Column(String,primary_key=True,unique=True,index=True)
-    name = Column(String,nullable=False)
+    __tablename__ = "user"
+    
+    id = Column(String, primary_key=True, unique=True, index=True)
+    name = Column(String, nullable=False)
     phoneNumber = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)

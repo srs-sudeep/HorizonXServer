@@ -10,30 +10,38 @@ from pydantic import BaseModel, Field
 class UserBase(BaseModel):
     """Base User schema."""
 
-    ldapid: str = Field(
-        ..., min_length=1, max_length=255, description="LDAP ID of the user"
-    )
     name: str = Field(..., min_length=1, description="Name of the user")
-    idNumber: str = Field(..., min_length=1, description="ID number of the user")
+    phoneNumber: str = Field(..., min_length=1, description="Phone number of the user")
+    email: str = Field(..., description="Email of the user")
+    username: str = Field(..., min_length=1, description="Username of the user")
     is_active: bool = True
 
 
 # User creation schema
 class UserCreate(UserBase):
     """User creation schema."""
+    
+    password: str = Field(..., min_length=8, description="Password for the user")
+    is_superuser: bool = False
 
 
 # User update schema
 class UserUpdate(BaseModel):
     """User update schema."""
 
+    name: Optional[str] = None
+    phoneNumber: Optional[str] = None
+    email: Optional[str] = None
+    username: Optional[str] = None
     is_active: Optional[bool] = None
+    is_superuser: Optional[bool] = None
 
 
 # User in DB schema
 class UserInDB(UserBase):
     """User in DB schema."""
 
+    id: str
     created_at: datetime
     updated_at: datetime
 
@@ -66,9 +74,11 @@ class UserRole(BaseModel):
 
 
 class UserWithRoles(BaseModel):
-    ldapid: str
-    idNumber: str
+    id: str
     name: str
+    phoneNumber: str
+    email: str
+    username: str
     is_active: bool
     roles: List[UserRole]
 
@@ -84,9 +94,11 @@ class UserRoleWithAssigned(BaseModel):
 
 
 class UserWithAllRoles(BaseModel):
-    ldapid: str
-    idNumber: str
+    id: str
     name: str
+    phoneNumber: str
+    email: str
+    username: str
     is_active: bool
     roles: List[UserRoleWithAssigned]
 
