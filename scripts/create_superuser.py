@@ -3,6 +3,7 @@ import asyncio
 import getpass
 import re
 import sys
+import uuid
 from pathlib import Path
 from typing import Optional
 
@@ -55,39 +56,31 @@ def validate_password(password: str) -> tuple[bool, str]:
 
 
 def get_input(prompt: str, validator: Optional[callable] = None, error_msg: str = "") -> str:
-    """Get input from user with validation."""
     while True:
         value = input(prompt).strip()
         if not value:
             print("This field is required.")
             continue
-        
         if validator and not validator(value):
             print(error_msg or "Invalid input.")
             continue
-        
         return value
 
 
 def get_password() -> str:
-    """Get password input with confirmation and validation."""
     while True:
         password = getpass.getpass("Password: ")
         if not password:
             print("Password is required.")
             continue
-        
-        # Validate password strength
         is_valid, message = validate_password(password)
         if not is_valid:
             print(f"Invalid password: {message}")
             continue
-        
         password2 = getpass.getpass("Password (again): ")
         if password != password2:
             print("Passwords don't match!")
             continue
-        
         return password
 
 
@@ -125,7 +118,7 @@ async def ensure_superuser_role(session: AsyncSession) -> Role:
     return superuser_role
 
 
-async def create_superuser_async(session: AsyncSession, email: str, username: str, password: str) -> None:
+async def create_superuser_async(session: AsyncSession, email: str, username: str, name: str, phoneNumber: str, password: str) -> None:
     """Create a superuser with all permissions."""
     try:
         # Check if user already exists
@@ -141,14 +134,15 @@ async def create_superuser_async(session: AsyncSession, email: str, username: st
         # Create superuser
         print("\n👤 Creating superuser account...")
         user = await user_service.create(
+            id=str(uuid.uuid4()),
             email=email,
             username=username,
+            name=name,
+            phoneNumber=phoneNumber,
             hashed_password=get_password_hash(password),
             is_superuser=True,
             is_active=True,
         )
-
-        # Add superuser role
         user.roles.append(superuser_role)
         await session.commit()
 
@@ -165,25 +159,15 @@ async def create_superuser_async(session: AsyncSession, email: str, username: st
 async def create_superuser() -> None:
     """Create a superuser with all permissions."""
     print("\n=== Create Superuser ===\n")
-    
-    # Get user input with validation
-    email = get_input(
-        "Email: ",
-        validator=validate_email,
-        error_msg="Please enter a valid email address."
-    )
-    
-    username = get_input(
-        "Username: ",
-        validator=validate_username,
-        error_msg="Username must be 3-32 characters long and contain only letters, numbers, underscores, and hyphens."
-    )
-    
+    email = get_input("Email: ", validator=validate_email, error_msg="Please enter a valid email address.")
+    username = get_input("Username: ", validator=validate_username, error_msg="Username must be 3-32 characters long and contain only letters, numbers, underscores, and hyphens.")
+    name = get_input("Name: ")
+    phoneNumber = get_input("Phone Number: ")
     password = get_password()
 
     async with async_session_factory() as session:
         try:
-            await create_superuser_async(session, email, username, password)
+            await create_superuser_async(session, email, username, name, phoneNumber, password)
         except Exception as e:
             print(f"\n❌ Failed to create superuser: {str(e)}")
             sys.exit(1)

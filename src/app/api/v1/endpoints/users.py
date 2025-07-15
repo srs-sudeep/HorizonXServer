@@ -1,28 +1,15 @@
 """User endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import or_, func
 from src.core.db import get_db
-from src.app.api import get_current_user
-from src.app.models import User
-from src.app.schemas import UserCreate
-from src.app.schemas.user import User as UserResponse
-from src.app.services import UserService
+from src.app.services import UserService, RoleService
+from src.app.schemas import UserWithAllRoles, UserResponse, UserWithRoles
+from src.app.api import get_current_user, has_permission
+from src.app.models import User, Role
 
 router = APIRouter()
-
-
-@router.post("/", response_model=UserResponse)
-async def create_user(
-    user_in: UserCreate,
-    db: AsyncSession = Depends(get_db),
-) -> UserResponse:
-    """Create new user."""
-    user_service = UserService(db)
-    existing_user = await user_service.get_by_email(user_in.email)
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return await user_service.create_user(user_in)
 
 
 @router.get("/me", response_model=UserResponse)
@@ -31,3 +18,95 @@ async def get_current_user_info(
 ) -> User:
     """Get current user info."""
     return current_user
+
+
+@router.get("/")
+async def get_all_users(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("users", "read")),
+    search: str = Query(None, description="Search text"),
+    status: bool = Query(None, description="Filter by active status"),
+    roles: list[int] = Query(None, description="Filter by role ids"),
+    limit: int = Query(10, ge=1, le=100, description="Page size"),
+    offset: int = Query(0, ge=0, description="Page offset"),
+):
+    role_service = RoleService(db)
+    all_roles = await role_service.get_all()
+    user_service = UserService(db)
+    return await user_service.get_all_users_with_filters(
+        search=search,
+        status=status,
+        roles=roles,
+        limit=limit,
+        offset=offset,
+        all_roles=all_roles,
+    )
+
+
+@router.post("/{user_id}/roles/{role_id}", response_model=UserWithRoles)
+async def add_role_to_user(
+    user_id: str,
+    role_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("users", "update")),
+):
+    service = UserService(db)
+    user = await service.add_role(user_id, role_id)
+    return UserWithRoles.from_orm(user)
+
+
+@router.delete("/{user_id}/roles/{role_id}", response_model=UserWithRoles)
+async def remove_role_from_user(
+    user_id: str,
+    role_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("users", "update")),
+):
+    service = UserService(db)
+    user = await service.remove_role(user_id, role_id)
+    return UserWithRoles.from_orm(user)
+
+
+@router.get("/user/{user_id}", response_model=UserResponse)
+async def get_user_by_id(
+    user_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("users", "read")),
+):
+    service = UserService(db)
+    user = await service.get_by_ldapid(user_id)
+    if not user:
+        user = await service.get_by_idNumber(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    roles = [role.name for role in user.roles]
+    return UserResponse(
+        ldapid=user.ldapid,
+        name=user.name,
+        idNumber=user.idNumber,
+        is_active=user.is_active,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+        roles=roles,
+    )
+
+
+@router.get("/filters")
+async def get_user_filters(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("users", "read")),
+):
+    # Fetch all roles
+    roleservice = RoleService(db)
+    roles = await roleservice.get_all()
+    role_options = [{"role_id": role.role_id, "name": role.name} for role in roles]
+
+    status_options = [
+        {"label": "Active", "value": True},
+        {"label": "Inactive", "value": False},
+    ]
+
+    return {
+        "roles": role_options,
+        "status": status_options,
+    }

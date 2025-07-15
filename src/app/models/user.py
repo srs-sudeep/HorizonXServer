@@ -9,7 +9,6 @@ from src.core.db import Base
 
 if TYPE_CHECKING:
     from src.app.models.role import Role
-    from src.app.models.post import Post
 
 # User-Role association table
 user_role = Table(
@@ -23,6 +22,8 @@ user_role = Table(
 class User(Base):
     """User model."""
     id = Column(String,primary_key=True,unique=True,index=True)
+    name = Column(String,nullable=False)
+    phoneNumber = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
@@ -33,4 +34,3 @@ class User(Base):
     roles: Mapped[List["Role"]] = relationship(
         "Role", secondary=user_role, back_populates="users"
     )
-    posts: Mapped[List["Post"]] = relationship("Post", back_populates="author")
