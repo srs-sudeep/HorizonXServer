@@ -6,13 +6,14 @@ import sys
 import uuid
 from pathlib import Path
 from typing import Optional
-
+from sqlalchemy import insert
 # Add project root to Python path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.models.role import Role
+from src.app.models.user import user_role
 from src.app.models.permission import Permission
 from src.app.services.user import UserService
 from src.core.db.session import async_session_factory
@@ -143,7 +144,11 @@ async def create_superuser_async(session: AsyncSession, email: str, username: st
             is_superuser=True,
             is_active=True,
         )
-        user.roles.append(superuser_role)
+        await session.flush()
+
+        stmt = insert(user_role).values(user_id=user.id, role_id=superuser_role.role_id)
+        await session.execute(stmt)
+
         await session.commit()
 
         print(f"\n✅ Superuser '{username}' created successfully!")

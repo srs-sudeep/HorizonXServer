@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     LOG_LEVEL: str
     SECRET_KEY: str
     API_V1_STR: str = "/api/v1"
-    PROXY_ROUTE: str = "core"
-    PROJECT_NAME: str = "FastAPI Boilerplate"
+    PROXY_ROUTE: str = "/"
+    PROJECT_NAME: str = "Horizonx Boilerplate"
 
     # CORS settings
     CORS_ORIGINS: Union[str, List[str]] = []
