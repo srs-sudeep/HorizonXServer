@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 user_role = Table(
     "user_role",
     Base.metadata,
-    Column("user_id", Integer, ForeignKey("user.id"), primary_key=True),
-    Column("role_id", Integer, ForeignKey("role.id"), primary_key=True),
+    Column("user_id", String, ForeignKey("user.id"), primary_key=True),
+    Column("role_id", Integer, ForeignKey("role.role_id"), primary_key=True),
 )
 
 
 class User(Base):
     """User model."""
-
+    id = Column(String,primary_key=True,unique=True,index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)

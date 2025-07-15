@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "HorizonX",
+            "Group": "Servers",
+            "Host": "horizonx_postgres",
+            "Port": 5432,
+            "MaintenanceDB": "horizonx",
+            "Username": "postgres",
+            "PassFile": "/pgpass",
+            "SSLMode": "prefer"
+        }
+    }
+}
