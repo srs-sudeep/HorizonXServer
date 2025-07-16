@@ -54,7 +54,7 @@ async def get_role(
 ) -> Role:
     """Get role by ID."""
     role_service = RoleService(db)
-    role = await role_service.get(role_id)
+    role = await role_service.get_by_id(role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
     return role
