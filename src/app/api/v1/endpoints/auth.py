@@ -3,8 +3,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.schemas import Login, RefreshToken, Token
-from src.app.services import AuthService
+from src.app.schemas import Login, RefreshToken, Token, UserCreate, UserResponse
+from src.app.services import AuthService, UserService
 from src.core.utils import create_rate_limiter
 from src.core.db import get_db
 
@@ -56,3 +56,25 @@ async def refresh_token(
     auth_service = AuthService(db)
     tokens = await auth_service.refresh_tokens(refresh_token.refresh_token)
     return Token(**tokens)
+
+
+@router.post("/register", response_model=UserResponse)
+async def register(
+    user_data: UserCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Register a new user with role_id=2 (normal user).
+    """
+    user_service = UserService(db)
+    user = await user_service.create_user_with_role(user_data, role_id=2)
+    return UserResponse(
+        id=user.id,
+        name=user.name,
+        phoneNumber=user.phoneNumber,
+        email=user.email,
+        username=user.username,
+        is_active=user.is_active,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+    )

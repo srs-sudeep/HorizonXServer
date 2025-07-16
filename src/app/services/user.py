@@ -1,13 +1,14 @@
 """User service."""
-
+import uuid
 from typing import Optional
 from sqlalchemy import or_, func, select
+from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
 from src.app.models import User, Role
 from src.app.schemas import UserWithRoles, UserResponse
-from src.core.security import verify_password
+from src.core.security import verify_password, get_password_hash
 from .base import BaseService
 
 
@@ -277,3 +278,21 @@ class UserService(BaseService[User]):
                 }
             )
         return {"total_count": total_count, "users": user_list}
+
+    async def create_user_with_role(self, user_data, role_id: int):
+        user = User(
+            id=str(uuid.uuid4()),
+            name=user_data.name,
+            phoneNumber=user_data.phoneNumber,
+            email=user_data.email,
+            username=user_data.username,
+            hashed_password=get_password_hash(user_data.password),
+            is_active=True,
+        )
+        role = await self.db.execute(select(Role).where(Role.role_id == role_id))
+        role_obj = role.scalar_one()
+        user.roles.append(role_obj)
+        self.db.add(user)
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
