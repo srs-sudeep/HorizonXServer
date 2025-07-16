@@ -15,9 +15,20 @@ router = APIRouter()
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
     current_user: User = Depends(get_current_user),
-) -> User:
+) -> UserResponse:
     """Get current user info."""
-    return current_user
+    roles = [role.name for role in current_user.roles]
+    return UserResponse(
+        id=current_user.id,
+        name=current_user.name,
+        phoneNumber=current_user.phoneNumber,
+        email=current_user.email,
+        username=current_user.username,
+        is_active=current_user.is_active,
+        created_at=current_user.created_at,
+        updated_at=current_user.updated_at,
+        roles=roles,
+    )
 
 
 @router.get("/")
