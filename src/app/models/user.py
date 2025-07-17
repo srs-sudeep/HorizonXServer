@@ -18,6 +18,12 @@ user_role = Table(
     Column("role_id", Integer, ForeignKey("role.role_id"), primary_key=True),
 )
 
+user_component = Table(
+    "user_component",
+    Base.metadata,
+    Column("user_id", String, ForeignKey("user.id"), primary_key=True),
+    Column("component_id", String, primary_key=True, nullable=True),
+)
 
 class User(Base):
     """User model."""

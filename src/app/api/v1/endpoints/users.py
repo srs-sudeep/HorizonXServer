@@ -5,7 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import or_, func
 from src.core.db import get_db
 from src.app.services import UserService, RoleService
-from src.app.schemas import UserWithAllRoles, UserResponse, UserWithRoles
+from src.app.schemas import (
+    UserWithAllRoles,
+    UserResponse,
+    UserWithRoles,
+    UserComponentAdd,
+    UserComponentRemove,
+    UserComponentList,
+)
 from src.app.api import get_current_user, has_permission
 from src.app.models import User, Role
 
@@ -17,18 +24,9 @@ async def get_current_user_info(
     current_user: User = Depends(get_current_user),
 ) -> UserResponse:
     """Get current user info."""
-    roles = [role.name for role in current_user.roles]
-    return UserResponse(
-        id=current_user.id,
-        name=current_user.name,
-        phoneNumber=current_user.phoneNumber,
-        email=current_user.email,
-        username=current_user.username,
-        is_active=current_user.is_active,
-        created_at=current_user.created_at,
-        updated_at=current_user.updated_at,
-        roles=roles,
-    )
+    # roles = [role.name for role in current_user.roles]
+    # print(f"Current user roles: {current_user}")
+    return current_user
 
 
 @router.get("/")
@@ -125,3 +123,32 @@ async def get_user_filters(
         "roles": role_options,
         "status": status_options,
     }
+
+
+@router.post("/add-component", response_model=UserComponentAdd)
+async def add_component_to_user(
+    data: UserComponentAdd,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("users", "update")),
+):
+    service = UserService(db)
+    return await service.add_component_to_user(data.user_id, data.component_id)
+
+
+@router.delete("/remove-component", response_model=UserComponentRemove)
+async def remove_component_from_user(
+    data: UserComponentRemove,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("users", "update")),
+):
+    service = UserService(db)
+    return await service.remove_component_from_user(data.user_id, data.component_id)
+
+
+@router.get("/components", response_model=UserComponentList)
+async def get_components_by_user(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(has_permission("users", "read")),
+):
+    service = UserService(db)
+    return await service.get_components_by_user(current_user.id)

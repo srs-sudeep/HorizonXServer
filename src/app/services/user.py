@@ -1,12 +1,12 @@
 """User service."""
 import uuid
 from typing import Optional
-from sqlalchemy import or_, func, select
+from sqlalchemy import or_, func, select, insert, delete
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
-from src.app.models import User, Role
+from src.app.models import User, Role, user_component
 from src.app.schemas import UserWithRoles, UserResponse
 from src.core.security import verify_password, get_password_hash
 from .base import BaseService
@@ -296,3 +296,27 @@ class UserService(BaseService[User]):
         await self.db.commit()
         await self.db.refresh(user)
         return user
+
+    async def add_component_to_user(self, user_id: str, component_id: str):
+        await self.db.execute(
+            insert(user_component).values(user_id=user_id, component_id=component_id)
+        )
+        await self.db.commit()
+        return {"user_id": user_id, "component_id": component_id}
+
+    async def remove_component_from_user(self, user_id: str, component_id: str):
+        await self.db.execute(
+            delete(user_component).where(
+                user_component.c.user_id == user_id,
+                user_component.c.component_id == component_id,
+            )
+        )
+        await self.db.commit()
+        return {"user_id": user_id, "component_id": component_id}
+
+    async def get_components_by_user(self, user_id: str):
+        result = await self.db.execute(
+            select(user_component.c.component_id).where(user_component.c.user_id == user_id)
+        )
+        component_ids = [row[0] for row in result.fetchall()]
+        return {"user_id": user_id, "component_ids": component_ids}

@@ -5,7 +5,7 @@ import traceback
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from loguru import logger
+from loguru import logger  # type: ignore
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
@@ -24,12 +24,20 @@ async def http_exception_handler(
     """
     # Log the HTTP exception
     logger.error(
-        f"HTTP {exc.status_code} Error: {exc.detail} - URL: {request.url.path}"
+        f"[HTTP ERROR] Status: {exc.status_code} | Detail: {exc.detail} | URL: {request.url.path}"
     )
 
+    if exc.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "detail": exc.detail,
+                "status_code": exc.status_code,
+            },
+        )
     return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail, "status_code": exc.status_code},
+        content={"detail": "Internal Server Error", "status_code": exc.status_code},
     )
 
 
@@ -74,10 +82,14 @@ async def internal_exception_handler(request: Request, exc: Exception) -> JSONRe
     error_details = traceback.format_exception(type(exc), exc, exc.__traceback__)
     error_message = str(exc)
 
-    # Log the error with traceback
+    # Log the error with traceback and any custom attributes
+    custom_code = getattr(exc, "code", None)
+    custom_detail = getattr(exc, "detail", None)
     logger.error(
         f"Internal Server Error on {request.url.path}: {error_message}\n"
-        f"{''.join(error_details)}"
+        f"Traceback: {''.join(error_details)}"
+        + (f"\nCustom code: {custom_code}" if custom_code else "")
+        + (f"\nCustom detail: {custom_detail}" if custom_detail else "")
     )
 
     # Return a generic error message to the client

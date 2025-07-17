@@ -29,9 +29,9 @@ config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
 from src.core.db.base import Base
 from src.app.models.permission import Permission
 from src.app.models.role import Role
-from src.app.models.user import User
+from src.app.models.user import User, user_component
 from src.app.models.module import Module
-from src.app.models.route import Route, route_role
+from src.app.models.route import Route, route_role, route_component
 
 target_metadata = Base.metadata
 

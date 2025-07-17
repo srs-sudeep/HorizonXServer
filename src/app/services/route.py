@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, insert, delete
 from sqlalchemy.orm import selectinload
 from src.app.schemas import RouteResponse
-from src.app.models import Route, Role
+from src.app.models import Route, Role, route_component
 
 
 class RouteService:
@@ -161,3 +161,27 @@ class RouteService:
             )
             for route in filtered_routes
         ]
+
+    async def add_component_to_route(self, route_id: int, component_id: str):
+        await self.db.execute(
+            insert(route_component).values(route_id=route_id, component_id=component_id)
+        )
+        await self.db.commit()
+        return {"route_id": route_id, "component_id": component_id}
+
+    async def remove_component_from_route(self, route_id: int, component_id: str):
+        await self.db.execute(
+            delete(route_component).where(
+                route_component.c.route_id == route_id,
+                route_component.c.component_id == component_id,
+            )
+        )
+        await self.db.commit()
+        return {"route_id": route_id, "component_id": component_id}
+
+    async def get_components_by_route(self, route_id: int):
+        result = await self.db.execute(
+            select(route_component.c.component_id).where(route_component.c.route_id == route_id)
+        )
+        component_ids = [row[0] for row in result.fetchall()]
+        return {"route_id": route_id, "component_ids": component_ids}

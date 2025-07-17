@@ -55,6 +55,7 @@ services:
     volumes:
       - ../pgadmin/servers.json:/pgadmin4/servers.json
       - ../pgadmin/pgpass:/pgpass
+      - horizonx_pgadmin_data:/var/lib/pgadmin
     user: root
     networks:
       - horizonx_network
@@ -62,7 +63,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  pgadmin_data:
+  horizonx_pgadmin_data:
 
 networks:
   horizonx_network:

@@ -60,6 +60,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 # For testing: create engine without connection pooling
 def create_test_engine():
     """Create test engine without connection pooling."""
+
     return create_async_engine(
         str(settings.DATABASE_URL),
         echo=settings.DEBUG,

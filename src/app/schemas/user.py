@@ -103,3 +103,18 @@ class UserWithAllRoles(BaseModel):
     roles: List[UserRoleWithAssigned]
 
     model_config = {"from_attributes": True}
+
+
+class UserComponentAdd(BaseModel):
+    user_id: str
+    component_id: str
+
+
+class UserComponentRemove(BaseModel):
+    user_id: str
+    component_id: str
+
+
+class UserComponentList(BaseModel):
+    user_id: str
+    component_ids: List[str]

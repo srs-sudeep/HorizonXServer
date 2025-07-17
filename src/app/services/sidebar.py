@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from src.app.models import Module, Role, route_role
-from src.app.schemas import SidebarModuleItem, SidebarRouteItem
+from src.app.models import Module, Role, route_role, route_component, user_component
+from src.app.schemas import SidebarModuleItem, SidebarRouteItem, SidebarComponentItem
 from src.app.services import RouteService, RoleService
 
 
@@ -9,10 +9,16 @@ class SidebarService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_sidebar(self, role: str = None, is_active: bool = None):
+    async def get_sidebar(self, user_id: str, role: str = None, is_active: bool = None):
         # Fetch all modules
         modules_result = await self.db.execute(select(Module))
         modules = modules_result.scalars().all()
+
+        # Fetch user's component IDs
+        user_component_result = await self.db.execute(
+            select(user_component.c.component_id).where(user_component.c.user_id == user_id)
+        )
+        user_component_ids = set(row[0] for row in user_component_result.fetchall())
 
         # If role filter is provided, get role_id
         role_id = None
@@ -45,6 +51,15 @@ class SidebarService:
             role_id = row.role_id
             route_roles_map.setdefault(route_id, []).append(role_id)
 
+        # Build a mapping of route_id to list of component_ids
+        route_component_result = await self.db.execute(select(route_component))
+        route_component_pairs = route_component_result.fetchall()
+        route_components_map = {}
+        for row in route_component_pairs:
+            route_id = row.route_id
+            component_id = row.component_id
+            route_components_map.setdefault(route_id, []).append(component_id)
+
         # Group routes by module_id
         routes_by_module = {}
         for route in routes:
@@ -60,6 +75,11 @@ class SidebarService:
                         {"role_id": str(rid), "role_name": role_map.get(rid, "")}
                         for rid in route_roles_map.get(route.id, [])
                     ]
+                    components_data = [
+                        SidebarComponentItem(component_id=cid)
+                        for cid in route_components_map.get(route.id, [])
+                        if cid in user_component_ids
+                    ]
                     items.append(
                         SidebarRouteItem(
                             id=route.id,
@@ -72,6 +92,7 @@ class SidebarService:
                             module_id=route.module_id,
                             children=children,
                             roles=roles_data,
+                            components=components_data,
                         )
                     )
             return items

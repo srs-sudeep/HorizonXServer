@@ -13,6 +13,12 @@ route_role = Table(
     Column("role_id", Integer, ForeignKey("role.role_id"), primary_key=True),
 )
 
+route_component = Table(
+    "route_component",
+    Base.metadata,
+    Column("route_id", Integer, ForeignKey("route.id"), primary_key=True),
+    Column("component_id", String, primary_key=True, nullable=True),
+)
 
 class Route(Base):
     __tablename__ = "route"
