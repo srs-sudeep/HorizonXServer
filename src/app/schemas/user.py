@@ -118,3 +118,6 @@ class UserComponentRemove(BaseModel):
 class UserComponentList(BaseModel):
     user_id: str
     component_ids: List[str]
+
+class UserComponentQuery(BaseModel):
+    user_id: str

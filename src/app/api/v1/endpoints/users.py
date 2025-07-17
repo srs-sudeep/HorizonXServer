@@ -6,12 +6,12 @@ from sqlalchemy import or_, func
 from src.core.db import get_db
 from src.app.services import UserService, RoleService
 from src.app.schemas import (
-    UserWithAllRoles,
     UserResponse,
     UserWithRoles,
     UserComponentAdd,
     UserComponentRemove,
     UserComponentList,
+    UserComponentQuery,
 )
 from src.app.api import get_current_user, has_permission
 from src.app.models import User, Role
@@ -147,8 +147,10 @@ async def remove_component_from_user(
 
 @router.get("/components", response_model=UserComponentList)
 async def get_components_by_user(
+    user_id: str = Query(None, description="User ID to fetch components for"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(has_permission("users", "read")),
 ):
     service = UserService(db)
-    return await service.get_components_by_user(current_user.id)
+    target_user_id = user_id if user_id is not None else current_user.id
+    return await service.get_components_by_user(target_user_id)

@@ -9,7 +9,7 @@ from src.app.schemas.permission import (
     PermissionWithSelected,
 )
 from src.app.schemas.role import Role, RoleCreate, RoleInDB, RoleUpdate
-from src.app.schemas.user import User, UserCreate, UserInDB, UserUpdate,UserBase, UserResponse,UserRole,UserWithRoles, UserWithAllRoles, UserRoleWithAssigned, UserComponentAdd, UserComponentRemove, UserComponentList
+from src.app.schemas.user import User, UserCreate, UserInDB, UserUpdate,UserBase, UserResponse,UserRole,UserWithRoles, UserWithAllRoles, UserRoleWithAssigned, UserComponentAdd, UserComponentRemove, UserComponentList, UserComponentQuery
 from src.app.schemas.module import (
     ModuleBase,
     ModuleCreate,
@@ -34,6 +34,7 @@ __all__ = [
     "UserComponentAdd",
     "UserComponentRemove",
     "UserComponentList",
+    "UserComponentQuery",
     "Role",
     "RoleCreate",
     "RoleUpdate",
