@@ -6,10 +6,10 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
-from src.app.models import User, Role, user_component
-from src.app.schemas import UserWithRoles, UserResponse
+from src.app.models import User, Role, user_component,user_page,route_role
+from src.app.schemas import UserWithRoles, UserRoutesList, UserRouteResponse, UserRouteCreate
 from src.core.security import verify_password, get_password_hash
-from .base import BaseService
+from src.app.services.base import BaseService
 
 
 class UserService(BaseService[User]):
@@ -320,3 +320,47 @@ class UserService(BaseService[User]):
         )
         component_ids = [row[0] for row in result.fetchall()]
         return {"user_id": user_id, "component_ids": component_ids}
+    
+    async def add_user_route(self, user_route: UserRouteCreate):
+        user = await self.get_by_id(user_route.user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_role_ids = [role.role_id for role in user.roles]
+        if not user_role_ids:
+            raise HTTPException(status_code=403, detail="User has no roles")
+        
+        query = select(route_role).where(
+            route_role.c.route_id == user_route.route_id,
+            route_role.c.role_id.in_(user_role_ids)
+        )
+        result = await self.db.execute(query)
+        if not result.first():
+            raise HTTPException(
+                status_code=403,
+                detail="User's roles do not have access to this route"
+            )
+        await self.db.execute(
+            insert(user_page).values(
+                user_id=user_route.user_id,
+                route_id=user_route.route_id
+            )
+        )
+        await self.db.commit()
+        return user_route
+
+    async def delete_user_route(self, user_id: str, route_id: str):
+        user_route = await self.db.execute(
+            select(user_page).where(user_page.user_id == user_id, user_page.route_id == route_id)
+        )
+        user_route_obj = user_route.scalar_one_or_none()
+        if not user_route_obj:
+            raise HTTPException(status_code=404, detail="User route not found")
+        await self.db.delete(user_route_obj)
+        await self.db.commit()
+
+    async def get_user_routes(self, user_id: str) -> UserRoutesList:
+        user_routes = await self.db.execute(
+            select(user_page).where(user_page.user_id == user_id)
+        )
+        routes = user_routes.scalars().all()
+        return UserRoutesList(user_id=user_id, routes=routes)

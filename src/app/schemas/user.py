@@ -119,5 +119,19 @@ class UserComponentList(BaseModel):
     user_id: str
     component_ids: List[str]
 
-class UserComponentQuery(BaseModel):
+class UserRouteBase(BaseModel):
+    route_id: str
+    has_access: bool = Field(default=False)
+
+class UserRouteCreate(UserRouteBase):
     user_id: str
+
+class UserRouteResponse(UserRouteBase):
+    user_id: str
+
+    class Config:
+        orm_mode = True
+
+class UserRoutesList(BaseModel):
+    user_id: str
+    routes: List[UserRouteResponse]

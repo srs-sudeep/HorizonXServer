@@ -25,6 +25,13 @@ user_component = Table(
     Column("component_id", String, primary_key=True, nullable=True),
 )
 
+user_page = Table(
+    "user_page",
+    Base.metadata,
+    Column("user_id", String, ForeignKey("user.id"), primary_key=True),
+    Column("route_id", String, ForeignKey("route.id"), primary_key=True, nullable=True),
+)
+
 class User(Base):
     """User model."""
     __tablename__ = "user"
