@@ -51,6 +51,30 @@ class Settings(BaseSettings):
     # JWT settings
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    
+    # File upload settings
+    UPLOAD_DIR: str = "uploads"
+    MAX_FILE_SIZE: int = 10485760
+    ALLOWED_EXTENSIONS: List[str] = [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".mp4",
+        ".mov",
+        ".avi",
+        ".wmv",
+        ".flv",
+        ".webm",
+        ".mp3",
+        ".wav",
+        ".flac",
+        ".aac",
+        ".ogg",
+    ]
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 

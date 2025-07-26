@@ -9,6 +9,7 @@ services:
       - "5000:8000"
     volumes:
       - ../:/app
+      - horizonx_uploads:/app/uploads
     env_file:
       - ../envs/.env.development
     depends_on:
@@ -64,6 +65,7 @@ volumes:
   postgres_data:
   redis_data:
   horizonx_pgadmin_data:
+  horizonx_uploads:
 
 networks:
   horizonx_network:

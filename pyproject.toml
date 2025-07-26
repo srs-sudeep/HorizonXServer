@@ -29,6 +29,7 @@ pydantic = "^2.5.0"
 pydantic-settings = "^2.1.0"
 email-validator = "^2.1.0"
 loguru = "^0.7.0"
+aiofiles = "^24.1.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.8.0"

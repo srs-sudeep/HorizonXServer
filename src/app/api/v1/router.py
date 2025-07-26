@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from src.app.api.v1.endpoints import (
+    file_router,
     auth_router,
     rbac_router,
     users_router,
@@ -15,6 +16,7 @@ from src.app.api.v1.endpoints import (
 router = APIRouter()
 
 # Include endpoint routers
+router.include_router(file_router,prefix = "/file",tags = ["file"])
 router.include_router(auth_router, prefix="/auth", tags=["auth"])
 router.include_router(users_router, prefix="/users", tags=["users"])
 router.include_router(rbac_router, prefix="/rbac", tags=["rbac"])
