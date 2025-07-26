@@ -14,6 +14,7 @@ class UserBase(BaseModel):
     phoneNumber: str = Field(..., min_length=1, description="Phone number of the user")
     email: str = Field(..., description="Email of the user")
     username: str = Field(..., min_length=1, description="Username of the user")
+    photo: Optional[str] = None
     is_active: bool = True
 
 

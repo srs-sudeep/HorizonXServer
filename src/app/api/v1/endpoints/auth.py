@@ -1,12 +1,13 @@
 """Authentication endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.schemas import Login, RefreshToken, Token, UserCreate, UserResponse
+from src.app.schemas import Login, RefreshToken, Token, UserResponse
 from src.app.services import AuthService, UserService
 from src.core.utils import create_rate_limiter
 from src.core.db import get_db
+from src.core.utils import file_upload_service
 
 router = APIRouter()
 
@@ -60,14 +61,32 @@ async def refresh_token(
 
 @router.post("/register", response_model=UserResponse)
 async def register(
-    user_data: UserCreate,
+    name: str = Form(...),
+    phoneNumber: str = Form(...),
+    email: str = Form(...),
+    username: str = Form(...),
+    password: str = Form(...),
+    photo: UploadFile = File(None),
+    role_id: int = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Register a new user with role_id=2 (normal user).
     """
+    photo_url = None
+    if photo:
+        file_info = await file_upload_service.save_file(photo, subfolder="userphotos")
+        photo_url = file_upload_service.get_file_url(file_info["file_path"])
+    user_data = {
+        "name": name,
+        "phoneNumber": phoneNumber,
+        "email": email,
+        "username": username,
+        "password": password,
+        "photo": photo_url,
+    }
     user_service = UserService(db)
-    user = await user_service.create_user_with_role(user_data, role_id=2)
+    user = await user_service.create_user_with_role(user_data, role_id=role_id)
     return UserResponse(
         id=user.id,
         name=user.name,
@@ -77,4 +96,7 @@ async def register(
         is_active=user.is_active,
         created_at=user.created_at,
         updated_at=user.updated_at,
+        photo=user.photo,
+        roles=[role.name for role in user.roles] if user.roles else [],
     )
+
